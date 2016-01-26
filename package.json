@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,15 @@
   "bugs": {
     "url": "https://github.com/localytics/npm-slack/issues"
   },
-  "homepage": "https://github.com/localytics/npm-slack"
+  "homepage": "https://github.com/localytics/npm-slack",
+  "dependencies": {
+    "lodash": "^4.0.1",
+    "qs": "^6.0.2"
+  },
+  "devDependencies": {
+    "chai": "^3.4.1",
+    "mocha": "^2.3.4",
+    "sinon": "^1.17.2",
+    "sinon-chai": "^2.8.0"
+  }
 }
