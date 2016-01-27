@@ -5,11 +5,9 @@ chai.use(require("sinon-chai"));
 
 var expect = chai.expect;
 
-var router = require('./slackbot');
-
-var router = require('./slackbot').router;
-var ephemeralResponse = require('./slackbot').ephemeralResponse;
-var inChannelResponse = require('./slackbot').inChannelResponse;
+var router = require('./index').router;
+var ephemeralResponse = require('./index').ephemeralResponse;
+var inChannelResponse = require('./index').inChannelResponse;
 
 describe('ephemeralResponse', function() {
   it('responds with the correct ephemeral response format', function() {
