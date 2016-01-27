@@ -5,20 +5,18 @@ chai.use(require("sinon-chai"));
 
 var expect = chai.expect;
 
-var router = require('./index').router;
-var ephemeralResponse = require('./index').ephemeralResponse;
-var inChannelResponse = require('./index').inChannelResponse;
+var slack = require('./index');
 
 describe('ephemeralResponse', function() {
   it('responds with the correct ephemeral response format', function() {
-    expect(ephemeralResponse('foo')).to.eql({
+    expect(slack.ephemeralResponse('foo')).to.eql({
       type: 'ephemeral',
       text: 'foo'
     });
   });
 
   it('responds with the correct in-channel response format', function() {
-    expect(inChannelResponse('bar')).to.eql({
+    expect(slack.inChannelResponse('bar')).to.eql({
       type: 'in_channel',
       text: 'bar'
     });
@@ -32,15 +30,15 @@ describe('router', function(){
 
   var commands = {
     'testA': ['Test command A', function(options, cb) {
-      cb(null, ephemeralResponse('A response'));
+      cb(null, slack.ephemeralResponse('A response'));
     }],
 
     'testB': ['Test command B', function(options, cb) {
-      cb(null, ephemeralResponse('B response'));
+      cb(null, slack.ephemeralResponse('B response'));
     }]
   };
 
-  var slackbot = router(config, commands);
+  var slackbot = slack.router(config, commands);
   var context = {};
 
   beforeEach(function(){
