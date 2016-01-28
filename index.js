@@ -53,8 +53,8 @@ SlackBot.prototype.router = function(event, context) {
 };
 
 // return a function (utility for unit testing)
-SlackBot.prototype.getCommand = function(commandName) {
-  return this.commands[commandName][1];
+SlackBot.prototype.call = function(commandName, options, callback) {
+  return this.commands[commandName][1](options, callback);
 };
 
 module.exports = SlackBot;

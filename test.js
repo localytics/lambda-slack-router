@@ -4,7 +4,7 @@ chai.use(require('sinon-chai'));
 var expect = chai.expect;
 var SlackBot = require('./index');
 
-describe('ephemeralResponse', function() {
+describe('responses', function() {
   it('responds with the correct ephemeral response format', function() {
     expect((new SlackBot()).ephemeralResponse('foo')).to.eql({
       type: 'ephemeral',
@@ -18,7 +18,22 @@ describe('ephemeralResponse', function() {
       text: 'bar'
     });
   });
-})
+});
+
+describe('call', function() {
+  it('calls the correct function with the correct arguments', function() {
+    var sandbox = sinon.sandbox.create();
+    var spiedFunction = sandbox.spy();
+    var slackbot = new SlackBot(null, {
+      test: ['test function', spiedFunction]
+    });
+
+    var options = {}, callback = {};
+    slackbot.call('test', options, callback);
+
+    expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
+  });
+});
 
 describe('router', function() {
   var slackbot = new SlackBot({ token: 'abc' });
@@ -31,7 +46,7 @@ describe('router', function() {
       cb(null, slackbot.ephemeralResponse('B response'));
     }]
   };
-  var context = {};
+  var context = {}, sandbox;
 
   beforeEach(function(){
     sandbox = sinon.sandbox.create();
