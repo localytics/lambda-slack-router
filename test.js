@@ -1,44 +1,36 @@
 var sinon = require('sinon');
 var chai = require('chai');
-
-chai.use(require("sinon-chai"));
-
+chai.use(require('sinon-chai'));
 var expect = chai.expect;
-
-var slack = require('./index');
+var SlackBot = require('./index');
 
 describe('ephemeralResponse', function() {
   it('responds with the correct ephemeral response format', function() {
-    expect(slack.ephemeralResponse('foo')).to.eql({
+    expect((new SlackBot()).ephemeralResponse('foo')).to.eql({
       type: 'ephemeral',
       text: 'foo'
     });
   });
 
   it('responds with the correct in-channel response format', function() {
-    expect(slack.inChannelResponse('bar')).to.eql({
+    expect((new SlackBot()).inChannelResponse('bar')).to.eql({
       type: 'in_channel',
       text: 'bar'
     });
   });
 })
 
-describe('router', function(){
-  var config = {
-    token: 'abc'
-  };
-
-  var commands = {
-    'testA': ['Test command A', function(options, cb) {
-      cb(null, slack.ephemeralResponse('A response'));
+describe('router', function() {
+  var slackbot = new SlackBot({ token: 'abc' });
+  slackbot.commands = {
+    testA: ['Test command A', function(options, cb) {
+      cb(null, slackbot.ephemeralResponse('A response'));
     }],
 
-    'testB': ['Test command B', function(options, cb) {
-      cb(null, slack.ephemeralResponse('B response'));
+    testB: ['Test command B', function(options, cb) {
+      cb(null, slackbot.ephemeralResponse('B response'));
     }]
   };
-
-  var slackbot = slack.router(config, commands);
   var context = {};
 
   beforeEach(function(){
@@ -51,8 +43,7 @@ describe('router', function(){
   });
 
   var assertHelp = function(event, context) {
-    slackbot(event, context);
-
+    slackbot.router(event, context);
     expect(context.done).to.have.been.calledWithExactly(undefined, {
       text: 'testA: Test command A\ntestB: Test command B',
       type: 'ephemeral'
@@ -66,8 +57,7 @@ describe('router', function(){
         'text': 'help'
       }
     };
-
-    slackbot(event, context);
+    slackbot.router(event, context);
 
     expect(context.done).to.have.been.calledWithExactly({
       'text': 'Invalid Slack token',
@@ -82,7 +72,6 @@ describe('router', function(){
         'text': 'help'
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -93,7 +82,6 @@ describe('router', function(){
         'text': ''
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -104,7 +92,6 @@ describe('router', function(){
         'text': 'testC'
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -115,8 +102,7 @@ describe('router', function(){
         'text': 'testA'
       }
     };
-
-    slackbot(event, context);
+    slackbot.router(event, context);
 
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'A response',
