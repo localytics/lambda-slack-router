@@ -37,27 +37,29 @@ SlackBot.prototype.ephemeralResponse = function(text) {
 };
 
 // control the flow of queries from slack
-SlackBot.prototype.router = function(event, context) {
-  var body = qs.parse(event.body);
-  var token = this.config.token;
+SlackBot.prototype.buildRouter = function() {
+  return function(event, context) {
+    var body = qs.parse(event.body);
+    var token = this.config.token;
 
-  if (!body.token || body.token != token)
-    return context.done(this.ephemeralResponse('Invalid Slack token'));
+    if (!body.token || body.token != token)
+      return context.done(this.ephemeralResponse('Invalid Slack token'));
 
-  var splitCommand = body.text.split(' '),
-    commandName = _.head(splitCommand),
-    commandArgs = _.tail(splitCommand);
+    var splitCommand = body.text.split(' '),
+      commandName = _.head(splitCommand),
+      commandArgs = _.tail(splitCommand);
 
-  if(commandName === 'help' || !this.commands.hasOwnProperty(commandName)) {
-    var command, helpText = '';
-    for(command in this.commands)
-      helpText += command + ': ' + this.commands[command] + '\n';
-    helpText += 'help: display this help message';
-    return context.done(null, this.ephemeralResponse(helpText));
-  }
-  else {
-    return this[commandName]({ userName: body.user_name, args: commandArgs }, context.done);
-  }
+    if(commandName === 'help' || !this.commands.hasOwnProperty(commandName)) {
+      var command, helpText = '';
+      for(command in this.commands)
+        helpText += command + ': ' + this.commands[command] + '\n';
+      helpText += 'help: display this help message';
+      return context.done(null, this.ephemeralResponse(helpText));
+    }
+    else {
+      return this[commandName]({ userName: body.user_name, args: commandArgs }, context.done);
+    }
+  }.bind(this);
 };
 
 module.exports = SlackBot;
