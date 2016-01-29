@@ -1,45 +1,59 @@
 var sinon = require('sinon');
 var chai = require('chai');
-
-chai.use(require("sinon-chai"));
-
+chai.use(require('sinon-chai'));
 var expect = chai.expect;
+var SlackBot = require('./index');
 
-var slack = require('./index');
-
-describe('ephemeralResponse', function() {
+describe('responses', function() {
   it('responds with the correct ephemeral response format', function() {
-    expect(slack.ephemeralResponse('foo')).to.eql({
+    expect((new SlackBot()).ephemeralResponse('foo')).to.eql({
       type: 'ephemeral',
       text: 'foo'
     });
   });
 
   it('responds with the correct in-channel response format', function() {
-    expect(slack.inChannelResponse('bar')).to.eql({
+    expect((new SlackBot()).inChannelResponse('bar')).to.eql({
       type: 'in_channel',
       text: 'bar'
     });
   });
-})
+});
 
-describe('router', function(){
-  var config = {
-    token: 'abc'
-  };
+describe('managing commands', function() {
+  it('adds a command with the correct description', function() {
+    var slackbot = new SlackBot(),
+      testCommand = function(options, callback) {};
+    slackbot.addCommand('test', 'The test command', testCommand);
 
-  var commands = {
-    'testA': ['Test command A', function(options, cb) {
-      cb(null, slack.ephemeralResponse('A response'));
-    }],
+    expect(slackbot.test).to.eq(testCommand);
+    expect(slackbot.commands.test).to.eq('The test command');
+  });
 
-    'testB': ['Test command B', function(options, cb) {
-      cb(null, slack.ephemeralResponse('B response'));
-    }]
-  };
+  it('calls the correct command with the correct arguments', function() {
+    var sandbox = sinon.sandbox.create(),
+      spiedFunction = sandbox.spy(),
+      slackbot = new SlackBot();
+    slackbot.addCommand('test', 'test function', spiedFunction);
 
-  var slackbot = slack.router(config, commands);
-  var context = {};
+    var options = {}, callback = {};
+    slackbot.callCommand('test', options, callback);
+
+    expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
+  });
+});
+
+describe('router', function() {
+  var context = {},
+    sandbox,
+    slackbot = new SlackBot({ token: 'abc' });
+
+  slackbot.addCommand('testA', 'Test command A', function(options, cb) {
+    cb(null, this.ephemeralResponse('A response'));
+  });
+  slackbot.addCommand('testB', 'Test command B', function(options, cb) {
+    cb(null, this.ephemeralResponse('B response'));
+  });
 
   beforeEach(function(){
     sandbox = sinon.sandbox.create();
@@ -51,10 +65,9 @@ describe('router', function(){
   });
 
   var assertHelp = function(event, context) {
-    slackbot(event, context);
-
-    expect(context.done).to.have.been.calledWithExactly(undefined, {
-      text: 'testA: Test command A\ntestB: Test command B',
+    slackbot.router(event, context);
+    expect(context.done).to.have.been.calledWithExactly(null, {
+      text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
       type: 'ephemeral'
     });
   };
@@ -66,8 +79,7 @@ describe('router', function(){
         'text': 'help'
       }
     };
-
-    slackbot(event, context);
+    slackbot.router(event, context);
 
     expect(context.done).to.have.been.calledWithExactly({
       'text': 'Invalid Slack token',
@@ -82,7 +94,6 @@ describe('router', function(){
         'text': 'help'
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -93,7 +104,6 @@ describe('router', function(){
         'text': ''
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -104,7 +114,6 @@ describe('router', function(){
         'text': 'testC'
       }
     };
-
     assertHelp(event, context);
   });
 
@@ -115,8 +124,7 @@ describe('router', function(){
         'text': 'testA'
       }
     };
-
-    slackbot(event, context);
+    slackbot.router(event, context);
 
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'A response',
