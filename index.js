@@ -3,19 +3,21 @@
 var _ = require('lodash'),
     qs = require('qs');
 
-function SlackBot(config, commands) {
+function SlackBot(config) {
   this.config = config;
-  this.commands = commands || {};
+  this.commands = {};
 }
 
 // add a command
 SlackBot.prototype.addCommand = function(commandName, description, command) {
-  this.commands[commandName] = [description, command];
+  this[commandName] = command;
+  this.commands[commandName] = description;
 };
 
 // call a stored command
 SlackBot.prototype.callCommand = function(commandName, options, callback) {
-  return this.commands[commandName][1](options, callback);
+  if(this.commands.hasOwnProperty(commandName))
+    return this[commandName](options, callback);
 };
 
 // respond to the whole channel
@@ -40,25 +42,21 @@ SlackBot.prototype.router = function(event, context) {
   var token = this.config.token;
 
   if (!body.token || body.token != token)
-    return context.done(this.ephemeralResponse("Invalid Slack token"));
+    return context.done(this.ephemeralResponse('Invalid Slack token'));
 
-  var splitCommand = body.text.split(" "),
+  var splitCommand = body.text.split(' '),
     commandName = _.head(splitCommand),
     commandArgs = _.tail(splitCommand);
 
-  var helpCommand = function() {
-    return _.map(this.commands, function(command, commandName) {
-      return commandName + ': ' + command[0];
-    }).join('\n');
-  }.bind(this);
-
-  if (commandName === 'help' || !this.commands.hasOwnProperty(commandName)) {
-    return context.done(undefined, this.ephemeralResponse(helpCommand()));
-  } else {
-    return this.commands[commandName][1](
-      { userName: body.user_name, args: commandArgs },
-      context.done
-    );
+  if(commandName === 'help' || !this.commands.hasOwnProperty(commandName)) {
+    var command, helpText = '';
+    for(command in this.commands)
+      helpText += command + ': ' + this.commands[command] + '\n';
+    helpText += 'help: display this help message';
+    return context.done(null, this.ephemeralResponse(helpText));
+  }
+  else {
+    return this[commandName]({ userName: body.user_name, args: commandArgs }, context.done);
   }
 };
 

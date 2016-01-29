@@ -26,15 +26,15 @@ describe('managing commands', function() {
       testCommand = function(options, callback) {};
     slackbot.addCommand('test', 'The test command', testCommand);
 
-    expect(slackbot.commands).to.deep.eq({ test: ['The test command', testCommand] });
+    expect(slackbot.test).to.eq(testCommand);
+    expect(slackbot.commands.test).to.eq('The test command');
   });
 
   it('calls the correct command with the correct arguments', function() {
-    var sandbox = sinon.sandbox.create();
-    var spiedFunction = sandbox.spy();
-    var slackbot = new SlackBot(null, {
-      test: ['test function', spiedFunction]
-    });
+    var sandbox = sinon.sandbox.create(),
+      spiedFunction = sandbox.spy(),
+      slackbot = new SlackBot();
+    slackbot.addCommand('test', 'test function', spiedFunction);
 
     var options = {}, callback = {};
     slackbot.callCommand('test', options, callback);
@@ -44,17 +44,16 @@ describe('managing commands', function() {
 });
 
 describe('router', function() {
-  var slackbot = new SlackBot({ token: 'abc' });
-  slackbot.commands = {
-    testA: ['Test command A', function(options, cb) {
-      cb(null, slackbot.ephemeralResponse('A response'));
-    }],
+  var context = {},
+    sandbox,
+    slackbot = new SlackBot({ token: 'abc' });
 
-    testB: ['Test command B', function(options, cb) {
-      cb(null, slackbot.ephemeralResponse('B response'));
-    }]
-  };
-  var context = {}, sandbox;
+  slackbot.addCommand('testA', 'Test command A', function(options, cb) {
+    cb(null, this.ephemeralResponse('A response'));
+  });
+  slackbot.addCommand('testB', 'Test command B', function(options, cb) {
+    cb(null, this.ephemeralResponse('B response'));
+  });
 
   beforeEach(function(){
     sandbox = sinon.sandbox.create();
@@ -67,8 +66,8 @@ describe('router', function() {
 
   var assertHelp = function(event, context) {
     slackbot.router(event, context);
-    expect(context.done).to.have.been.calledWithExactly(undefined, {
-      text: 'testA: Test command A\ntestB: Test command B',
+    expect(context.done).to.have.been.calledWithExactly(null, {
+      text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
       type: 'ephemeral'
     });
   };
