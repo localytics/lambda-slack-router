@@ -21,14 +21,14 @@ And you add commands by:
       cb(null, this.inChannelResponse('B response'));
     });
 
-router
+buildRouter
 -------
 
-`router` is a function that takes an event body and context object, and routes to the appropriate command in the given object:
+`buildRouter` returns a function that takes an event body and context object, and routes to the appropriate command in the SlackBot object.
 
 If you're using Lambda and API Gateway, you can set the handler as the router, which will wire up the Slack webhook to the appropriate function defined in your list of commands, passing the context object down into each command as a callback.
 
-    exports.handler = slackbot.router;
+    exports.handler = slackbot.buildRouter();
 
 ephemeralResponse
 ------
