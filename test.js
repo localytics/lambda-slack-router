@@ -20,8 +20,16 @@ describe('responses', function() {
   });
 });
 
-describe('call', function() {
-  it('calls the correct function with the correct arguments', function() {
+describe('managing commands', function() {
+  it('adds a command with the correct description', function() {
+    var slackbot = new SlackBot(),
+      testCommand = function(options, callback) {};
+    slackbot.addCommand('test', 'The test command', testCommand);
+
+    expect(slackbot.commands).to.deep.eq({ test: ['The test command', testCommand] });
+  });
+
+  it('calls the correct command with the correct arguments', function() {
     var sandbox = sinon.sandbox.create();
     var spiedFunction = sandbox.spy();
     var slackbot = new SlackBot(null, {
@@ -29,7 +37,7 @@ describe('call', function() {
     });
 
     var options = {}, callback = {};
-    slackbot.call('test', options, callback);
+    slackbot.callCommand('test', options, callback);
 
     expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
   });

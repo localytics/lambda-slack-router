@@ -5,8 +5,18 @@ var _ = require('lodash'),
 
 function SlackBot(config, commands) {
   this.config = config;
-  this.commands = commands;
+  this.commands = commands || {};
 }
+
+// add a command
+SlackBot.prototype.addCommand = function(commandName, description, command) {
+  this.commands[commandName] = [description, command];
+};
+
+// call a stored command
+SlackBot.prototype.callCommand = function(commandName, options, callback) {
+  return this.commands[commandName][1](options, callback);
+};
 
 // respond to the whole channel
 SlackBot.prototype.inChannelResponse = function(text) {
@@ -50,11 +60,6 @@ SlackBot.prototype.router = function(event, context) {
       context.done
     );
   }
-};
-
-// return a function (utility for unit testing)
-SlackBot.prototype.call = function(commandName, options, callback) {
-  return this.commands[commandName][1](options, callback);
 };
 
 module.exports = SlackBot;
