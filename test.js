@@ -43,7 +43,7 @@ describe('managing commands', function() {
   });
 });
 
-describe('router', function() {
+describe('buildRouter', function() {
   var context = {},
     sandbox,
     slackbot = new SlackBot({ token: 'abc' });
@@ -65,7 +65,7 @@ describe('router', function() {
   });
 
   var assertHelp = function(event, context) {
-    slackbot.router(event, context);
+    slackbot.buildRouter()(event, context);
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
       type: 'ephemeral'
@@ -79,7 +79,7 @@ describe('router', function() {
         'text': 'help'
       }
     };
-    slackbot.router(event, context);
+    slackbot.buildRouter()(event, context);
 
     expect(context.done).to.have.been.calledWithExactly({
       'text': 'Invalid Slack token',
@@ -124,7 +124,7 @@ describe('router', function() {
         'text': 'testA'
       }
     };
-    slackbot.router(event, context);
+    slackbot.buildRouter()(event, context);
 
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'A response',
