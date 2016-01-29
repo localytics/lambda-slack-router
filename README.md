@@ -7,18 +7,19 @@ Install the package into your existing Node app.
 
     $ npm install --save git+ssh://github.com/localytics/localytics-slack.git
 
-This module exposes one utility class. It is built like:
+This module exposes the SlackBot utility class. It is built like:
 
     var SlackBot = require('localytics-slack');
     var slackbot = new SlackBot({ token: 'abc' });
-    slackbot.commands = {
-      'testA': ['Test command A', function(options, cb) {
-        cb(null, slackbot.ephemeralResponse('A response'));
-      }],
-      'testB': ['Test command B', function(options, cb) {
-        cb(null, slackbot.ephemeralResponse('B response'));
-      }]
-    };
+
+And you add commands by:
+
+    slackbot.addCommand('testA', 'Test command A', function(options, cb) {
+      cb(null, this.ephemeralResponse('A response'));
+    });
+    slackbot.addCommand('testB', 'Test command B', function(options, cb) {
+      cb(null, this.inChannelResponse('B response'));
+    });
 
 router
 -------
