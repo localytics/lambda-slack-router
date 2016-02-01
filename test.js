@@ -18,6 +18,14 @@ describe('responses', function() {
       text: 'bar'
     });
   });
+
+  it('adds attachments appropriately', function() {
+    expect((new SlackBot()).ephemeralResponse({ text: 'test', attachments: [{ text: 'kdeisz' }] })).to.eql({
+      type: 'ephemeral',
+      text: 'test',
+      attachments: [{ text: 'kdeisz' }]
+    });
+  });
 });
 
 describe('managing commands', function() {
@@ -67,7 +75,8 @@ describe('buildRouter', function() {
   var assertHelp = function(event, context) {
     slackbot.buildRouter()(event, context);
     expect(context.done).to.have.been.calledWithExactly(null, {
-      text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
+      text: 'Available commands:',
+      attachments: [{ text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message' }],
       type: 'ephemeral'
     });
   };

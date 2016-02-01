@@ -20,20 +20,24 @@ SlackBot.prototype.callCommand = function(commandName, options, callback) {
     return this[commandName](options, callback);
 };
 
+var buildResponse = function(type, response) {
+  if(typeof response === 'string') {
+    return { type: type, text: response };
+  }
+  else {
+    response.type = type;
+    return response;
+  }
+}
+
 // respond to the whole channel
-SlackBot.prototype.inChannelResponse = function(text) {
-  return {
-    type: 'in_channel',
-    text: text
-  };
+SlackBot.prototype.inChannelResponse = function(response) {
+  return buildResponse('in_channel', response);
 };
 
 // respond to just the requesting user
-SlackBot.prototype.ephemeralResponse = function(text) {
-  return {
-    type: 'ephemeral',
-    text: text
-  };
+SlackBot.prototype.ephemeralResponse = function(response) {
+  return buildResponse('ephemeral', response);
 };
 
 // control the flow of queries from slack
@@ -54,7 +58,7 @@ SlackBot.prototype.buildRouter = function() {
       for(command in this.commands)
         helpText += command + ': ' + this.commands[command] + '\n';
       helpText += 'help: display this help message';
-      return context.done(null, this.ephemeralResponse(helpText));
+      return context.done(null, this.ephemeralResponse({ text: 'Available commands:', attachments: [{ text: helpText }] }));
     }
     else {
       return this[commandName]({ userName: body.user_name, args: commandArgs }, context.done);
