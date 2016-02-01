@@ -75,7 +75,8 @@ describe('buildRouter', function() {
   var assertHelp = function(event, context) {
     slackbot.buildRouter()(event, context);
     expect(context.done).to.have.been.calledWithExactly(null, {
-      text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
+      text: 'Available commands:',
+      attachments: [{ text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message' }],
       type: 'ephemeral'
     });
   };

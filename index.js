@@ -58,7 +58,7 @@ SlackBot.prototype.buildRouter = function() {
       for(command in this.commands)
         helpText += command + ': ' + this.commands[command] + '\n';
       helpText += 'help: display this help message';
-      return context.done(null, this.ephemeralResponse(helpText));
+      return context.done(null, this.ephemeralResponse({ text: 'Available commands:', attachments: [{ text: helpText }] }));
     }
     else {
       return this[commandName]({ userName: body.user_name, args: commandArgs }, context.done);
