@@ -20,20 +20,24 @@ SlackBot.prototype.callCommand = function(commandName, options, callback) {
     return this[commandName](options, callback);
 };
 
+var buildResponse = function(type, response) {
+  if(typeof response === 'string') {
+    return { type: type, text: response };
+  }
+  else {
+    response.type = type;
+    return response;
+  }
+}
+
 // respond to the whole channel
-SlackBot.prototype.inChannelResponse = function(text) {
-  return {
-    type: 'in_channel',
-    text: text
-  };
+SlackBot.prototype.inChannelResponse = function(response) {
+  return buildResponse('in_channel', response);
 };
 
 // respond to just the requesting user
-SlackBot.prototype.ephemeralResponse = function(text) {
-  return {
-    type: 'ephemeral',
-    text: text
-  };
+SlackBot.prototype.ephemeralResponse = function(response) {
+  return buildResponse('ephemeral', response);
 };
 
 // control the flow of queries from slack

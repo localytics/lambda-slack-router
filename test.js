@@ -18,6 +18,14 @@ describe('responses', function() {
       text: 'bar'
     });
   });
+
+  it('adds attachments appropriately', function() {
+    expect((new SlackBot()).ephemeralResponse({ text: 'test', attachments: [{ text: 'kdeisz' }] })).to.eql({
+      type: 'ephemeral',
+      text: 'test',
+      attachments: [{ text: 'kdeisz' }]
+    });
+  });
 });
 
 describe('managing commands', function() {

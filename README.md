@@ -33,9 +33,9 @@ If you're using Lambda and API Gateway, you can set the handler as the router, w
 ephemeralResponse
 ------
 
-`ephemeralResponse` takes a string and returns it wrapped in an object specifying that the response should be ephemeral in the Slack channel - only to the user that submitted the original command.
+`ephemeralResponse` takes either a string or an object. If the passed value is a string, it is returned wrapped in an object specifying that the response should be ephemeral in the Slack channel - only to the user that submitted the original command. If the passed value is an object, the "type" attribute is set and the object is returned.
 
 inChannelResponse
 -------
 
-Like above, `inChannelResponse` takes a string and wraps it in an object that specifies it should be shown to all users in the channel.
+Like above, `inChannelResponse` takes a string or an object specifies that it should be shown to all users in the channel.
