@@ -7,15 +7,23 @@ var SlackBot = require('./index');
 describe('responses', function() {
   it('responds with the correct ephemeral response format', function() {
     expect((new SlackBot()).ephemeralResponse('foo')).to.eql({
-      type: 'ephemeral',
+      response_type: 'ephemeral',
       text: 'foo'
     });
   });
 
   it('responds with the correct in-channel response format', function() {
     expect((new SlackBot()).inChannelResponse('bar')).to.eql({
-      type: 'in_channel',
+      response_type: 'in_channel',
       text: 'bar'
+    });
+  });
+
+  it('adds attachments appropriately', function() {
+    expect((new SlackBot()).ephemeralResponse({ text: 'test', attachments: [{ text: 'kdeisz' }] })).to.eql({
+      response_type: 'ephemeral',
+      text: 'test',
+      attachments: [{ text: 'kdeisz' }]
     });
   });
 });
@@ -67,8 +75,9 @@ describe('buildRouter', function() {
   var assertHelp = function(event, context) {
     slackbot.buildRouter()(event, context);
     expect(context.done).to.have.been.calledWithExactly(null, {
-      text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message',
-      type: 'ephemeral'
+      text: 'Available commands:',
+      attachments: [{ text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message' }],
+      response_type: 'ephemeral'
     });
   };
 
@@ -83,7 +92,7 @@ describe('buildRouter', function() {
 
     expect(context.done).to.have.been.calledWithExactly({
       'text': 'Invalid Slack token',
-      'type': 'ephemeral'
+      'response_type': 'ephemeral'
     });
   });
 
@@ -128,7 +137,7 @@ describe('buildRouter', function() {
 
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'A response',
-      type: 'ephemeral'
+      response_type: 'ephemeral'
     });
   });
 });
