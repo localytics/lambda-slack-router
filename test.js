@@ -77,7 +77,7 @@ describe('buildRouter', function() {
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'Available commands:',
       attachments: [{ text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message' }],
-      type: 'ephemeral'
+      type: 'in_channel'
     });
   };
 
