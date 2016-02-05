@@ -20,12 +20,12 @@ SlackBot.prototype.callCommand = function(commandName, options, callback) {
     return this[commandName](options, callback);
 };
 
-var buildResponse = function(type, response) {
+var buildResponse = function(response_type, response) {
   if(typeof response === 'string') {
-    return { type: type, text: response };
+    return { response_type: response_type, text: response };
   }
   else {
-    response.type = type;
+    response.response_type = response_type;
     return response;
   }
 }
