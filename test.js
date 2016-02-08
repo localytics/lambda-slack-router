@@ -35,7 +35,16 @@ describe('managing commands', function() {
     slackbot.addCommand('test', 'The test command', testCommand);
 
     expect(slackbot.test).to.eq(testCommand);
-    expect(slackbot.commands.test).to.eq('The test command');
+    expect(slackbot.commands.test.desc).to.eq('The test command');
+  });
+
+  it('adds a command with the correct arguments', function() {
+    var slackbot = new SlackBot(),
+      testCommand = function(options, callback) {};
+    slackbot.addCommand('test <arg1> <arg2>', 'The test command', testCommand);
+
+    expect(slackbot.test).to.eq(testCommand);
+    expect(slackbot.commands.test.args).to.deep.eq(['<arg1>', '<arg2>']);
   });
 
   it('calls the correct command with the correct arguments', function() {
@@ -44,7 +53,20 @@ describe('managing commands', function() {
       slackbot = new SlackBot();
     slackbot.addCommand('test', 'test function', spiedFunction);
 
-    var options = {}, callback = {};
+    var options = {}, callback = new Function();
+    slackbot.callCommand('test', options, callback);
+
+    expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
+  });
+
+  it('restricts calling without the correct number of arguments', function() {
+    var sandbox = sinon.sandbox.create(),
+      spiedFunction = sandbox.spy(),
+      slackbot = new SlackBot();
+    slackbot.addCommand('test <arg1>', 'test function', new Function());
+    slackbot.help = spiedFunction;
+
+    var options = {}, callback = new Function();
     slackbot.callCommand('test', options, callback);
 
     expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
