@@ -1,7 +1,7 @@
 {
   "name": "localytics-slack",
   "version": "1.0.0",
-  "description": "",
+  "description": "A utility class for managing Slack slashcommands in an AWS lambda function",
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha"
@@ -10,14 +10,13 @@
     "type": "git",
     "url": "https://github.com/localytics/localytics-slack.git"
   },
-  "author": "",
+  "author": "Localytics",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/localytics/localytics-slack/issues"
   },
   "homepage": "https://github.com/localytics/localytics-slack",
   "dependencies": {
-    "lodash": "^4.0.1",
     "qs": "^6.0.2"
   },
   "devDependencies": {
