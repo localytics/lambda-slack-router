@@ -1,8 +1,9 @@
-var sinon = require('sinon');
-var chai = require('chai');
+var sinon = require('sinon'),
+  chai = require('chai'),
+  expect = chai.expect,
+  SlackBot = require('./index');
+
 chai.use(require('sinon-chai'));
-var expect = chai.expect;
-var SlackBot = require('./index');
 
 describe('responses', function() {
   it('responds with the correct ephemeral response format', function() {
@@ -20,10 +21,10 @@ describe('responses', function() {
   });
 
   it('adds attachments appropriately', function() {
-    expect((new SlackBot()).ephemeralResponse({ text: 'test', attachments: [{ text: 'kdeisz' }] })).to.eql({
+    expect((new SlackBot()).ephemeralResponse({ text: 'test', attachments: [{ text: 'attachment' }] })).to.eql({
       response_type: 'ephemeral',
       text: 'test',
-      attachments: [{ text: 'kdeisz' }]
+      attachments: [{ text: 'attachment' }]
     });
   });
 });
@@ -75,8 +76,7 @@ describe('managing commands', function() {
 
 describe('buildRouter', function() {
   var context = {},
-    sandbox,
-    slackbot = new SlackBot({ token: 'abc' });
+    slackbot = new SlackBot({ token: 'token' });
 
   slackbot.addCommand('testA', 'Test command A', function(options, cb) {
     cb(null, this.ephemeralResponse('A response'));
@@ -85,13 +85,8 @@ describe('buildRouter', function() {
     cb(null, this.ephemeralResponse('B response'));
   });
 
-  beforeEach(function(){
-    sandbox = sinon.sandbox.create();
-    context.done = sandbox.spy();
-  });
-
-  afterEach(function() {
-    sandbox.restore();
+  beforeEach(function() {
+    context.done = sinon.spy();
   });
 
   var assertHelp = function(event, context) {
@@ -106,7 +101,7 @@ describe('buildRouter', function() {
   it('fails when the provided token is invalid', function() {
     var event = {
       'body': {
-        'token': 'xyz',
+        'token': 'foo',
         'text': 'help'
       }
     };
@@ -121,7 +116,7 @@ describe('buildRouter', function() {
   it('responds with help text', function() {
     var event = {
       'body': {
-        'token': 'abc',
+        'token': 'token',
         'text': 'help'
       }
     };
@@ -131,7 +126,7 @@ describe('buildRouter', function() {
   it('routes to the help text by default', function() {
     var event = {
       'body': {
-        'token': 'abc',
+        'token': 'token',
         'text': ''
       }
     };
@@ -141,8 +136,8 @@ describe('buildRouter', function() {
   it('routes to the help text when invalid command is specified', function() {
     var event = {
       'body': {
-        'token': 'abc',
-        'text': 'testC'
+        'token': 'token',
+        'text': 'invalid'
       }
     };
     assertHelp(event, context);
@@ -151,7 +146,7 @@ describe('buildRouter', function() {
   it('routes to the appropriate command name', function() {
     var event = {
       'body': {
-        'token': 'abc',
+        'token': 'token',
         'text': 'testA'
       }
     };
