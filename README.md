@@ -38,17 +38,22 @@ The routing for the commands is achieved by the Slackbot's router acting as the 
 
 ## Testing
 
-It's helpful in testing your function to also export the slackbot itself. If it's part of the module's exports, each function can be tested explicitly as opposed to having to go through the router (which would be testing library code instead of your own). A sample test using mocha for the aforementioned ping function would look like
+It's helpful in testing your function to also export the slackbot itself. If it's part of the module's exports, each function can be tested explicitly as opposed to having to go through the router (which would be testing library code instead of your own). A sample test using `mocha` and `chai` for the aforementioned `ping` function would look like
 
-    var slackbot = require('./index').slackbot;
-    describe('SlackBot', function() {
-      it('responds to ping appropriately', function() {
-        var receivedArgs = [];
-        slackBot.ping(null, function() {
-          receivedArgs = arguments;
-        });
-        assert.equal(slackbot.inChannelResponse('Hello World'), receivedArgs[1]);
+    var expect = require('chai').expect;
+      slackBot = require('../slackbot/handler').slackBot;
+    
+    describe('slackbot', function() {
+      it('responds to ping', function() {
+        var received = false, receivedArgs = [], callback = function(error, success) {
+          received = true;
+          receivedArgs = [error, success];
+        };
+        
+        slackBot.ping(null, callback);
+        expect(received).to.be.true;
+        expect(receivedArgs).to.deep.eq([null, slackBot.inChannelResponse('Hello World')]);
       });
     });
 
-assuming your handler is named index.js and you had `exports.slackbot = slackbot` in your handler.
+assuming your handler is named index.js and you had `exports.slackBot = slackBot` in your handler.
