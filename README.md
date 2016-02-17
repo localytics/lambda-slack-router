@@ -1,35 +1,54 @@
 # localytics-slack
 
-A Node package for creating Slackbots.
+[![Build Status](https://travis-ci.com/localytics/localytics-slack.svg?token=kQUiABmGkzyHdJdMnCnv&branch=master)](https://travis-ci.com/localytics/localytics-slack)
 
-Install the package into your existing Node app.
+As part of our commitment toward more integrated ChatOps, `localytics-slack` is a pattern for building [Slack slash commands](https://api.slack.com/slash-commands) using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
 
-    $ npm install --save git+ssh://github.com/localytics/localytics-slack.git
+    /testbot ping
 
-This module exposes the SlackBot utility class. It is built like:
+into a correctly configured Slack channel, it would call the appropriate `ping` command and return the generated response to the user. A `help` command is also generated that is based on the provided commands and their descriptions, so that you can also call
+
+    /testbot help
+
+and a usage message will be returned.
+
+## Configuration
+
+Commands are added to the slackbot through the `addCommand` function. Sample configuration for the above ping command would look like
 
     var SlackBot = require('localytics-slack');
-    var slackbot = new SlackBot({ token: 'token' });
-
-And you add commands by:
-
-    slackbot.addCommand('testA', 'Test command A', function(options, cb) {
-      cb(null, this.ephemeralResponse('A response'));
-    });
-    slackbot.addCommand('testB <arg1> <arg2>', 'Test command B', function(options, cb) {
-      cb(null, this.inChannelResponse('B response'));
+    var slackbot = new SlackBot({ token: "<token>" });
+    slackbot.addCommand('ping', 'Ping the lambda', function(options, callback) {
+      callback(null, this.inChannelResponse('Hello World'));
     });
 
-## buildRouter
+In the above code, a slackbot is created with the given token (used for verifying the authenticity of each request). The ping command is then added to the routing, and when called responds with an in-channel response of 'Hello World'.
 
-`buildRouter` returns a function that takes an event body and context object, and routes to the appropriate command in the SlackBot object. With AWS Lambda and API Gateway you can set the handler as the router, which will route the Slack webhook to the appropriate function defined in your list of commands, passing the context object down into each command as a callback.
+The first argument to the `addCommand` function is the name of the command. This can optionally have arguments specified like `ping <arg1> <arg2>`. In that case the router will only invoke that function if the number of arguments matches exactly. Arguments should be space-separated. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
+
+The two arguments passed to the command callback are `options` and `callback`. The `options` object contains two attributes: `userName` (your Slack username) and `args` (the arguments passed to the function, as an array). The callback function is the same as the `context.done` function that's built into [lambda](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html). The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
+
+The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
+
+## Routing
+
+The routing for the commands is achieved by the Slackbot's router acting as the [handler function](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html) for the lambda. After a Slackbot has been fully configured (adding in configuration, building the command callbacks, etc.), the handler should be set to the return value of the buildRouter function.
 
     exports.handler = slackbot.buildRouter();
 
-## ephemeralResponse
+## Testing
 
-`ephemeralResponse` takes either a string or an object. If the passed value is a string, it is returned wrapped in an object specifying that the response should be ephemeral in the Slack channel - only to the user that submitted the original command. If the passed value is an object, the `response_type` attribute is set and the object is returned.
+It's helpful in testing your function to also export the slackbot itself. If it's part of the module's exports, each function can be tested explicitly as opposed to having to go through the router (which would be testing library code instead of your own). A sample test using mocha for the aforementioned ping function would look like
 
-## inChannelResponse
+    var slackbot = require('./index').slackbot;
+    describe('SlackBot', function() {
+      it('responds to ping appropriately', function() {
+        var receivedArgs = [];
+        slackBot.ping(null, function() {
+          receivedArgs = arguments;
+        });
+        assert.equal(slackbot.inChannelResponse('Hello World'), receivedArgs[1]);
+      });
+    });
 
-Like above, `inChannelResponse` takes a string or an object specifies that it should be shown to all users in the channel.
+assuming your handler is named index.js and you had `exports.slackbot = slackbot` in your handler.
