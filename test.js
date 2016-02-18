@@ -42,10 +42,10 @@ describe('managing commands', function() {
   it('adds a command with the correct arguments', function() {
     var slackbot = new SlackBot(),
       testCommand = function(options, callback) {};
-    slackbot.addCommand('test <arg1> <arg2>', 'The test command', testCommand);
+    slackbot.addCommand('test arg1 arg2', 'The test command', testCommand);
 
     expect(slackbot.test).to.eq(testCommand);
-    expect(slackbot.commands.test.args).to.deep.eq(['<arg1>', '<arg2>']);
+    expect(slackbot.commands.test.args).to.deep.eq(['arg1', 'arg2']);
   });
 
   it('calls the correct command with the correct arguments', function() {
@@ -54,23 +54,25 @@ describe('managing commands', function() {
       slackbot = new SlackBot();
     slackbot.addCommand('test', 'test function', spiedFunction);
 
-    var options = {}, callback = new Function();
-    slackbot.callCommand('test', options, callback);
+    var callback = new Function();
+    slackbot.callCommand('test', {}, callback);
 
-    expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
+    var givenArgs = spiedFunction.getCall(0).args;
+    expect(givenArgs[0]).to.deep.eq({ args: {} });
+    expect(givenArgs[1]).to.eq(callback);
   });
 
   it('restricts calling without the correct number of arguments', function() {
     var sandbox = sinon.sandbox.create(),
       spiedFunction = sandbox.spy(),
       slackbot = new SlackBot();
-    slackbot.addCommand('test <arg1>', 'test function', new Function());
+    slackbot.addCommand('test arg1', 'test function', new Function());
     slackbot.help = spiedFunction;
 
-    var options = {}, callback = new Function();
-    slackbot.callCommand('test', options, callback);
+    var callback = new Function();
+    slackbot.callCommand('test', {}, callback);
 
-    expect(spiedFunction).to.have.been.calledWithExactly(options, callback);
+    expect(spiedFunction).to.have.been.calledWithExactly({}, callback);
   });
 });
 
@@ -81,8 +83,11 @@ describe('buildRouter', function() {
   slackbot.addCommand('testA', 'Test command A', function(options, cb) {
     cb(null, this.ephemeralResponse('A response'));
   });
-  slackbot.addCommand('testB', 'Test command B', function(options, cb) {
+  slackbot.addCommand('testB arg1 arg2', 'Test command B', function(options, cb) {
     cb(null, this.ephemeralResponse('B response'));
+  });
+  slackbot.addCommand('testC arg1 arg2...', 'Test command C', function(options, cb) {
+    cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
   });
 
   beforeEach(function() {
@@ -93,7 +98,7 @@ describe('buildRouter', function() {
     slackbot.buildRouter()(event, context);
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'Available commands:',
-      attachments: [{ text: 'testA: Test command A\ntestB: Test command B\nhelp: display this help message' }],
+      attachments: [{ text: 'testA: Test command A\ntestB arg1 arg2: Test command B\ntestC arg1 arg2...: Test command C\nhelp: display this help message' }],
       response_type: 'ephemeral'
     });
   };
@@ -154,6 +159,21 @@ describe('buildRouter', function() {
 
     expect(context.done).to.have.been.calledWithExactly(null, {
       text: 'A response',
+      response_type: 'ephemeral'
+    });
+  });
+
+  it('supports splatting the last argument', function() {
+    var event = {
+      'body': {
+        'token': 'token',
+        'text': 'testC these are all my words'
+      }
+    };
+    slackbot.buildRouter()(event, context);
+
+    expect(context.done).to.have.been.calledWithExactly(null, {
+      text: 'are all my words',
       response_type: 'ephemeral'
     });
   });
