@@ -12,6 +12,17 @@ into a correctly configured Slack channel, it would call the appropriate `ping` 
 
 and a usage message will be returned.
 
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Routing](#routing)
+- [Testing](#testing)
+
+## Installation
+
+From the root of your project, run:
+
+    $ npm install --save lambda-slack-router
+
 ## Configuration
 
 Commands are added to the slackbot through the `addCommand` function. Sample configuration for the above ping command would look like
