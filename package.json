@@ -1,6 +1,6 @@
 {
-  "name": "localytics-slack",
-  "version": "1.0.0",
+  "name": "lambda-slack-router",
+  "version": "1.0.2",
   "description": "A utility class for managing Slack slashcommands in an AWS lambda function",
   "main": "index.js",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/localytics/localytics-slack.git"
+    "url": "https://github.com/localytics/lambda-slack-router.git"
   },
   "author": "Localytics",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/localytics/localytics-slack/issues"
+    "url": "https://github.com/localytics/lambda-slack-router/issues"
   },
-  "homepage": "https://github.com/localytics/localytics-slack",
+  "homepage": "https://github.com/localytics/lambda-slack-router",
   "dependencies": {
     "qs": "^6.0.2"
   },
