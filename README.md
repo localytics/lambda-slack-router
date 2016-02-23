@@ -1,8 +1,8 @@
-# localytics-slack
+# lambda-slack-router
 
-[![Build Status](https://travis-ci.com/localytics/localytics-slack.svg?token=kQUiABmGkzyHdJdMnCnv&branch=master)](https://travis-ci.com/localytics/localytics-slack)
+[![Build Status](https://travis-ci.com/localytics/lambda-slack-router.svg?token=kQUiABmGkzyHdJdMnCnv&branch=master)](https://travis-ci.com/localytics/lambda-slack-router)
 
-As part of our commitment toward more integrated ChatOps, `localytics-slack` is a pattern for building [Slack slash commands](https://api.slack.com/slash-commands) using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
+`lambda-slack-router` is a pattern for building [Slack slash commands](https://api.slack.com/slash-commands) using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
 
     /testbot ping
 
@@ -12,11 +12,22 @@ into a correctly configured Slack channel, it would call the appropriate `ping` 
 
 and a usage message will be returned.
 
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Routing](#routing)
+- [Testing](#testing)
+
+## Installation
+
+From the root of your project, run:
+
+    $ npm install --save lambda-slack-router
+
 ## Configuration
 
 Commands are added to the slackbot through the `addCommand` function. Sample configuration for the above ping command would look like
 
-    var SlackBot = require('localytics-slack');
+    var SlackBot = require('lambda-slack-router');
     var slackbot = new SlackBot({ token: "<token>" });
     slackbot.addCommand('ping', 'Ping the lambda', function(options, callback) {
       callback(null, this.inChannelResponse('Hello World'));
