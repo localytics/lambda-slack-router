@@ -11,7 +11,7 @@
     "url": "https://github.com/localytics/lambda-slack-router.git"
   },
   "author": "Localytics",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/localytics/lambda-slack-router/issues"
   },
