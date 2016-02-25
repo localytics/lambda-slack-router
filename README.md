@@ -12,11 +12,6 @@ into a correctly configured Slack channel, it would call the appropriate `ping` 
 
 and a usage message will be returned.
 
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Routing](#routing)
-- [Testing](#testing)
-
 ## Installation
 
 From the root of your project, run:
@@ -27,19 +22,23 @@ From the root of your project, run:
 
 Commands are added to the slackbot through the `addCommand` function. Sample configuration for the above ping command would look like
 
-    var SlackBot = require('lambda-slack-router');
-    var slackbot = new SlackBot({ token: "<token>" });
-    slackbot.addCommand('ping', 'Ping the lambda', function(options, callback) {
-      callback(null, this.inChannelResponse('Hello World'));
-    });
+```javascript
+var SlackBot = require('lambda-slack-router');
+var slackbot = new SlackBot({ token: "<token>" });
+slackbot.addCommand('ping', 'Ping the lambda', function(options, callback) {
+  callback(null, this.inChannelResponse('Hello World'));
+});
+```
 
 In the above code, a slackbot is created with the given token (used for verifying the authenticity of each request). The ping command is then added to the routing, and when called responds with an in-channel response of 'Hello World'.
 
 The first argument to the `addCommand` function is the name of the command. This can optionally have arguments specified like `ping arg1 arg2`. In that case the router will only invoke that function if the number of arguments matches exactly. Arguments should be space-separated. You can optionally append an ellipsis to the last argument of your command which will allow an unlimited number of arguments to be passed and stored in the `args` object in that parameter as an array. For instance, a command configured like
 
-    slackbot.addCommand('echo words...', 'Response with the words given', function(options, callback) {
-      callback(null, this.ephemeralResponse(options.args.words.join(' ')));
-    });
+```javascript
+slackbot.addCommand('echo words...', 'Response with the words given', function(options, callback) {
+  callback(null, this.ephemeralResponse(options.args.words.join(' ')));
+});
+```
 
 would return 'hello world' when called as `/testbot echo hello world`. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
 
@@ -51,26 +50,30 @@ The responses for Slack can either be ephemeral (returning to the user that invo
 
 The routing for the commands is achieved by the Slackbot's router acting as the [handler function](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html) for the lambda. After a Slackbot has been fully configured (adding in configuration, building the command callbacks, etc.), the handler should be set to the return value of the buildRouter function.
 
-    exports.handler = slackbot.buildRouter();
+```javascript
+exports.handler = slackbot.buildRouter();
+```
 
 ## Testing
 
 It's helpful in testing your function to also export the slackbot itself. If it's part of the module's exports, each function can be tested explicitly as opposed to having to go through the router (which would be testing library code instead of your own). A sample test using `mocha` and `chai` for the aforementioned `ping` function would look like
 
-    var expect = require('chai').expect;
-      slackBot = require('../slackbot/handler').slackBot;
-    
-    describe('slackbot', function() {
-      it('responds to ping', function() {
-        var received = false, receivedArgs = [], callback = function(error, success) {
-          received = true;
-          receivedArgs = [error, success];
-        };
-        
-        slackBot.ping(null, callback);
-        expect(received).to.be.true;
-        expect(receivedArgs).to.deep.eq([null, slackBot.inChannelResponse('Hello World')]);
-      });
-    });
+```javascript
+var expect = require('chai').expect;
+  slackBot = require('../slackbot/handler').slackBot;
+
+describe('slackbot', function() {
+  it('responds to ping', function() {
+    var received = false, receivedArgs = [], callback = function(error, success) {
+      received = true;
+      receivedArgs = [error, success];
+    };
+
+    slackBot.ping(null, callback);
+    expect(received).to.be.true;
+    expect(receivedArgs).to.deep.eq([null, slackBot.inChannelResponse('Hello World')]);
+  });
+});
+```
 
 assuming your handler is named index.js and you had `exports.slackBot = slackBot` in your handler.
