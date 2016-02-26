@@ -82,16 +82,15 @@ SlackBot.prototype.ephemeralResponse = function (response) {
 
 // respond with a usage message
 SlackBot.prototype.help = function (options, callback) {
-  var command;
   var helpText = '';
 
-  for (command in this.commands) {
+  Object.keys(this.commands).forEach(function (command) {
     helpText += command;
     if (this.commands[command].args.length) {
       helpText += ' ' + this.commands[command].args.join(' ');
     }
     helpText += ': ' + this.commands[command].desc + '\n';
-  }
+  }.bind(this));
   helpText += 'help: display this help message';
 
   callback(null, this.ephemeralResponse({

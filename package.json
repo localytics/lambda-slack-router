@@ -36,8 +36,7 @@
     },
     "rules": {
       "camelcase": 0,
-      "func-names": 0,
-      "guard-for-in": 0
+      "func-names": 0
     }
   }
 }
