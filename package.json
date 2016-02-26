@@ -1,6 +1,6 @@
 {
   "name": "lambda-slack-router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A utility class for managing Slack slashcommands in an AWS lambda function",
   "main": "index.js",
   "scripts": {
@@ -37,7 +37,12 @@
     "rules": {
       "camelcase": 0,
       "func-names": 0,
-      "max-len": [2, { "code": 117 }]
+      "max-len": [
+        2,
+        {
+          "code": 117
+        }
+      ]
     }
   }
 }
