@@ -4,8 +4,8 @@
   "description": "A utility class for managing Slack slashcommands in an AWS lambda function",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha",
-    "lint": "./node_modules/eslint/bin/eslint.js ."
+    "test": "mocha",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,7 @@
     "rules": {
       "camelcase": 0,
       "func-names": 0,
-      "no-param-reassign": 0
+      "guard-for-in": 0
     }
   }
 }

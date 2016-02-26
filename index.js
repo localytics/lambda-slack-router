@@ -5,33 +5,34 @@ var qs = require('qs');
 var Utils = {
   alignArgs: function (argNames, args) {
     var aligned = {};
-    var lastArgName;
-    args = args || [];
+    var givenArgs = args || [];
+    var lastArg;
 
-    if (argNames.length === args.length) {
+    if (argNames.length === givenArgs.length) {
       argNames.forEach(function (argName, index) {
-        aligned[argName] = args[index];
+        aligned[argName] = givenArgs[index];
       });
       return aligned;
     }
     if (argNames[argNames.length - 1].match(/\.\.\.$/)) {
       argNames.slice(0, -1).forEach(function (argName, index) {
-        aligned[argName] = args[index];
+        aligned[argName] = givenArgs[index];
       });
 
-      lastArgName = argNames[argNames.length - 1];
-      aligned[lastArgName.substring(0, lastArgName.length - 3)] = args.slice(argNames.length - 1);
+      lastArg = argNames[argNames.length - 1];
+      aligned[lastArg.substring(0, lastArg.length - 3)] = givenArgs.slice(argNames.length - 1);
       return aligned;
     }
     return false;
   },
 
   buildResponse: function (response_type, response) {
+    var modifiedResponse = response;
     if (typeof response === 'string') {
       return { response_type: response_type, text: response };
     }
-    response.response_type = response_type;
-    return response;
+    modifiedResponse.response_type = response_type;
+    return modifiedResponse;
   },
 
   splitCommand: function (command) {
@@ -56,13 +57,15 @@ SlackBot.prototype.addCommand = function (commandName, desc, command) {
 // call a stored command
 SlackBot.prototype.callCommand = function (commandName, options, callback) {
   var args;
+  var modifiedOptions = options;
+
   if (!this.commands.hasOwnProperty(commandName)) {
     return this.help(options, callback);
   }
   args = Utils.alignArgs(this.commands[commandName].args, options.args);
   if (args !== false) {
-    options.args = args;
-    return this[commandName](options, callback);
+    modifiedOptions.args = args;
+    return this[commandName](modifiedOptions, callback);
   }
   return this.help(options, callback);
 };
@@ -83,10 +86,6 @@ SlackBot.prototype.help = function (options, callback) {
   var helpText = '';
 
   for (command in this.commands) {
-    if (!{}.hasOwnProperty.call(this.commands, command)) {
-      continue;
-    }
-
     helpText += command;
     if (this.commands[command].args.length) {
       helpText += ' ' + this.commands[command].args.join(' ');
