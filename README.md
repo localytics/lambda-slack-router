@@ -14,7 +14,7 @@ and a usage message will be returned.
 
 ## Installation
 
-From the root of your project, run:
+This package is [hosted on npm](https://www.npmjs.com/package/lambda-slack-router). From the root of your project run:
 
     $ npm install --save lambda-slack-router
 
