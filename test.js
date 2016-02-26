@@ -7,21 +7,21 @@ chai.use(require('sinon-chai'));
 
 describe('responses', function () {
   it('responds with the correct ephemeral response format', function () {
-    expect((new SlackBot()).ephemeralResponse('foo')).to.deep.equal({
+    expect(new SlackBot().ephemeralResponse('foo')).to.deep.equal({
       response_type: 'ephemeral',
       text: 'foo'
     });
   });
 
   it('responds with the correct in-channel response format', function () {
-    expect((new SlackBot()).inChannelResponse('bar')).to.deep.equal({
+    expect(new SlackBot().inChannelResponse('bar')).to.deep.equal({
       response_type: 'in_channel',
       text: 'bar'
     });
   });
 
   it('adds attachments appropriately', function () {
-    var response = (new SlackBot()).ephemeralResponse({
+    var response = new SlackBot().ephemeralResponse({
       text: 'test',
       attachments: [{
         text: 'attachment'
