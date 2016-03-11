@@ -1,6 +1,6 @@
 # lambda-slack-router
 
-[![Build Status](https://travis-ci.com/localytics/lambda-slack-router.svg?token=kQUiABmGkzyHdJdMnCnv&branch=master)](https://travis-ci.com/localytics/lambda-slack-router)
+[![Build Status](https://travis-ci.org/localytics/lambda-slack-router.svg?branch=master)](https://travis-ci.org/localytics/lambda-slack-router)
 
 `lambda-slack-router` is a pattern for building [Slack slash commands](https://api.slack.com/slash-commands) using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
 
