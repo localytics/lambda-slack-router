@@ -46,7 +46,15 @@ var Utils = {
 function SlackBot(config) {
   this.config = config;
   this.commands = {};
+  this.root = this.help;
+  this.rootCommand = {};
 }
+
+// set the command to be called if body text is all args
+SlackBot.prototype.setRootCommand = function (args, desc, command) {
+  this.root = command;
+  this.rootCommand = { args: args ? args.split(' ') : [], desc: desc };
+};
 
 // add a command
 SlackBot.prototype.addCommand = function (commandName, desc, command) {
@@ -61,6 +69,13 @@ SlackBot.prototype.callCommand = function (commandName, options, callback) {
   var modifiedOptions = options;
 
   if (!this.commands.hasOwnProperty(commandName)) {
+    if (this.rootCommand.args) {
+      args = Utils.alignArgs(this.rootCommand.args, options.args);
+      if (args !== false) {
+        modifiedOptions.args = args;
+        return this.root(modifiedOptions, callback);
+      }
+    }
     return this.help(options, callback);
   }
   args = Utils.alignArgs(this.commands[commandName].args, options.args);
@@ -85,6 +100,12 @@ SlackBot.prototype.ephemeralResponse = function (response) {
 SlackBot.prototype.help = function (options, callback) {
   var helpText = '';
 
+  if (this.rootCommand.desc) {
+    if (this.rootCommand.args.length) {
+      helpText += this.rootCommand.args.join(' ');
+    }
+    helpText += ': ' + this.rootCommand.desc + '\n';
+  }
   Object.keys(this.commands).forEach(function (command) {
     helpText += command;
     if (this.commands[command].args.length) {
@@ -112,8 +133,13 @@ SlackBot.prototype.buildRouter = function () {
     }
 
     split = Utils.splitCommand(body.text);
-    if (split.commandName === 'help' || !this.commands.hasOwnProperty(split.commandName)) {
+    if (split.commandName === 'help') {
       return this.help({}, context.done);
+    } else if (!this.commands.hasOwnProperty(split.commandName)) {
+      if (split.commandName) {
+        split.args.unshift(split.commandName);
+      }
+      split.commandName = 'root';
     }
 
     return this.callCommand(split.commandName, {
