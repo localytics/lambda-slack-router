@@ -45,6 +45,15 @@ describe('managing commands', function () {
     testCommand = function () {};
   });
 
+  it('defaults the root function to help', function () {
+    var spiedFunction = sinon.stub(slackbot, 'help');
+    var callback = function () {};
+
+    slackbot.callCommand('root', {}, callback);
+
+    expect(spiedFunction).to.have.been.calledWithExactly({}, callback);
+  });
+
   it('adds a command with the correct description', function () {
     slackbot.addCommand('test', 'The test command', testCommand);
 
@@ -52,11 +61,25 @@ describe('managing commands', function () {
     expect(slackbot.commands.test.desc).to.equal('The test command');
   });
 
+  it('sets the root command with the correct description', function () {
+    slackbot.setRootCommand('', 'The root command', testCommand);
+
+    expect(slackbot.root).to.equal(testCommand);
+    expect(slackbot.rootCommand.desc).to.equal('The root command');
+  });
+
   it('adds a command with the correct arguments', function () {
     slackbot.addCommand('test arg1 arg2', 'The test command', testCommand);
 
     expect(slackbot.test).to.equal(testCommand);
     expect(slackbot.commands.test.args).to.deep.equal(['arg1', 'arg2']);
+  });
+
+  it('sets the root command with the correct arguments', function () {
+    slackbot.setRootCommand('arg1 arg2', 'The root command', testCommand);
+
+    expect(slackbot.root).to.equal(testCommand);
+    expect(slackbot.rootCommand.args).to.deep.equal(['arg1', 'arg2']);
   });
 
   it('calls the correct command with the correct arguments', function () {
@@ -67,7 +90,40 @@ describe('managing commands', function () {
     slackbot.addCommand('test', 'test function', spiedFunction);
     slackbot.callCommand('test', {}, callback);
 
+    expect(spiedFunction).to.have.been.called;
     givenArgs = spiedFunction.getCall(0).args;
+    expect(givenArgs[0]).to.deep.equal({ args: {} });
+    expect(givenArgs[1]).to.equal(callback);
+  });
+
+  it('calls the root command with the correct arguments', function () {
+    var spiedFunction = sinon.spy();
+    var callback = function () {};
+    var givenArgs;
+
+    slackbot.setRootCommand('', 'root function', spiedFunction);
+    slackbot.callCommand('root', {}, callback);
+
+    expect(spiedFunction).to.have.been.called;
+    givenArgs = spiedFunction.getCall(0).args;
+    expect(givenArgs[0]).to.deep.equal({ args: {} });
+    expect(givenArgs[1]).to.equal(callback);
+  });
+
+  it('overrides previously set root commands', function () {
+    var firstSpiedFunction = sinon.spy();
+    var secondSpiedFunction = sinon.spy();
+    var callback = function () {};
+    var givenArgs;
+
+    slackbot.setRootCommand('', 'first root function', firstSpiedFunction);
+    slackbot.setRootCommand('', 'second root function', secondSpiedFunction);
+    slackbot.callCommand('root', {}, callback);
+
+    expect(slackbot.rootCommand.desc).to.equal('second root function');
+    expect(firstSpiedFunction).to.have.not.been.called
+    expect(secondSpiedFunction).to.have.been.called;
+    givenArgs = secondSpiedFunction.getCall(0).args;
     expect(givenArgs[0]).to.deep.equal({ args: {} });
     expect(givenArgs[1]).to.equal(callback);
   });
@@ -81,6 +137,16 @@ describe('managing commands', function () {
 
     expect(spiedFunction).to.have.been.calledWithExactly({}, callback);
   });
+
+  it('restricts calling root without the correct number of arguments', function () {
+    var spiedFunction = sinon.stub(slackbot, 'help');
+    var callback = function () {};
+
+    slackbot.setRootCommand('arg1', 'root function', testCommand);
+    slackbot.callCommand('root', {}, callback);
+
+    expect(spiedFunction).to.have.been.calledWithExactly({}, callback);
+  });
 });
 
 describe('buildRouter', function () {
@@ -89,6 +155,7 @@ describe('buildRouter', function () {
 
   var assertHelp = function (event, commandContext) {
     var descriptions = [
+      'arg1: Root command',
       'testA: Test command A',
       'testB arg1 arg2: Test command B',
       'testC arg1 arg2...: Test command C',
@@ -102,6 +169,10 @@ describe('buildRouter', function () {
       response_type: 'ephemeral'
     });
   };
+
+  slackbot.setRootCommand('arg1', 'Root command', function (options, cb) {
+    cb(null, this.ephemeralResponse('Root response: ' + options.args.arg1));
+  });
 
   slackbot.addCommand('testA', 'Test command A', function (options, cb) {
     cb(null, this.ephemeralResponse('A response'));
@@ -152,14 +223,19 @@ describe('buildRouter', function () {
     assertHelp(event, context);
   });
 
-  it('routes to the help text when invalid command is specified', function () {
+  it('routes to the root command when only args are specified', function () {
     var event = {
       body: {
         token: 'token',
-        text: 'invalid'
+        text: 'root1'
       }
     };
-    assertHelp(event, context);
+    slackbot.buildRouter()(event, context);
+
+    expect(context.done).to.have.been.calledWithExactly(null, {
+      text: 'Root response: root1',
+      response_type: 'ephemeral'
+    });
   });
 
   it('routes to the appropriate command name', function () {
