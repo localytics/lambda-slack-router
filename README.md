@@ -42,6 +42,18 @@ slackbot.addCommand('echo words...', 'Response with the words given', function(o
 
 would return 'hello world' when called as `/testbot echo hello world`. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
 
+A root command can be added to the slackbot through the `setRootCommand` function. This root command function would be called if the text entered by the user doesn't match any other commands. This allows the user to directly enter arguments for the core command of the testbot. The `setRootCommand` function is similar to `addCommand` except that you don't specify the name of the command. The echo command implemented as a root command configured like
+
+```javascript
+slackbot.setRootCommand('words...', 'Default response with the words given', function(options, callback) {
+  callback(null, this.ephemeralResponse(options.args.words.join(' ')));
+});
+```
+
+would return 'hello world' when called as `/testbot hello world`. If the slackbot also had a hello command, then that command would be called instead. If a root command is not set for a slackbot, the help text is displayed instead. The slackbot has only one root command. Additional calls to the `setRootCommand` function overwrites any previously configured root command.
+
+For simple bots with only a single command, the root command could be the only command added to the slackbot. This removes the need for the user to type a command name every time. The help command would continue to function as normal and would display the expected arguments and description of the root command.
+
 The two arguments passed to the command callback are `options` and `callback`. The `options` object contains two attributes: `userName` (your Slack username) and `args` (the arguments passed to the function, as an object). The callback function is the same as the `context.done` function that's built into [lambda](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html). The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
