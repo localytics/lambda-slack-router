@@ -90,7 +90,7 @@ describe('managing commands', function () {
     slackbot.addCommand('test', 'test function', spiedFunction);
     slackbot.callCommand('test', {}, callback);
 
-    expect(spiedFunction).to.have.been.called;
+    expect(spiedFunction).to.have.been.called; // eslint-disable-line no-unused-expressions
     givenArgs = spiedFunction.getCall(0).args;
     expect(givenArgs[0]).to.deep.equal({ args: {} });
     expect(givenArgs[1]).to.equal(callback);
@@ -104,7 +104,7 @@ describe('managing commands', function () {
     slackbot.setRootCommand('', 'root function', spiedFunction);
     slackbot.callCommand('root', {}, callback);
 
-    expect(spiedFunction).to.have.been.called;
+    expect(spiedFunction).to.have.been.called; // eslint-disable-line no-unused-expressions
     givenArgs = spiedFunction.getCall(0).args;
     expect(givenArgs[0]).to.deep.equal({ args: {} });
     expect(givenArgs[1]).to.equal(callback);
@@ -121,8 +121,8 @@ describe('managing commands', function () {
     slackbot.callCommand('root', {}, callback);
 
     expect(slackbot.rootCommand.desc).to.equal('second root function');
-    expect(firstSpiedFunction).to.have.not.been.called
-    expect(secondSpiedFunction).to.have.been.called;
+    expect(firstSpiedFunction).to.have.not.been.called; // eslint-disable-line no-unused-expressions
+    expect(secondSpiedFunction).to.have.been.called; // eslint-disable-line no-unused-expressions
     givenArgs = secondSpiedFunction.getCall(0).args;
     expect(givenArgs[0]).to.deep.equal({ args: {} });
     expect(givenArgs[1]).to.equal(callback);
