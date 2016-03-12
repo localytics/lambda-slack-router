@@ -42,7 +42,7 @@ slackbot.addCommand('echo words...', 'Response with the words given', function(o
 
 would return 'hello world' when called as `/testbot echo hello world`. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
 
-A root command can be added to the slackbot through the `setRootCommand` function. This root command function would be called if the text entered by the user doesn't match any other commands. This allows the user to directly enter arguments for the core command of the testbot. The `setRootCommand` function is similar to `addCommand` except that you don't specify the name of the command. The echo command implemented as a root command configured like
+A root command can be added to the slackbot through the `setRootCommand` function. This root command function would be called if the text entered by the user doesn't match any other commands. This allows the user to directly enter arguments for the core command of the slackbot. The `setRootCommand` function is similar to `addCommand` except that you don't specify the name of the command. The echo command implemented as a root command configured like
 
 ```javascript
 slackbot.setRootCommand('words...', 'Default response with the words given', function(options, callback) {
