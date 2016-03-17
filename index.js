@@ -1,32 +1,9 @@
 'use strict';
 
+var ArgParser = require('./lib/arg-parser');
 var qs = require('qs');
 
 var Utils = {
-  alignArgs: function (argNames, args) {
-    var aligned = {};
-    var givenArgs = args || [];
-    var lastArg = argNames[argNames.length - 1];
-    var splatting = (lastArg && lastArg.match(/\.\.\.$/));
-
-    if ((givenArgs.length < argNames.length) || ((givenArgs.length > argNames.length) && !splatting)) {
-      return false;
-    }
-
-    argNames.slice(0, -1).forEach(function (argName, index) {
-      aligned[argName] = givenArgs[index];
-    });
-    if (lastArg) {
-      if (splatting) {
-        aligned[lastArg.substring(0, lastArg.length - 3)] = givenArgs.slice(argNames.length - 1);
-      } else {
-        aligned[lastArg] = givenArgs[givenArgs.length - 1];
-      }
-    }
-
-    return aligned;
-  },
-
   buildResponse: function (response_type, response) {
     var modifiedResponse = response;
     if (typeof response === 'string') {
@@ -49,10 +26,17 @@ function SlackBot(config) {
 }
 
 // add a command
-SlackBot.prototype.addCommand = function (commandName, desc, command) {
-  var split = Utils.splitCommand(commandName);
-  this[split.commandName] = command;
-  this.commands[split.commandName] = { args: split.args, desc: desc };
+SlackBot.prototype.addCommand = function (command, desc, callback) {
+  var args = [];
+  var commandName = command;
+
+  if (command instanceof Array) {
+    args = command.slice(1);
+    commandName = command[0];
+  }
+
+  this[commandName] = callback;
+  this.commands[commandName] = { args: args, desc: desc };
 };
 
 // call a stored command
@@ -63,7 +47,7 @@ SlackBot.prototype.callCommand = function (commandName, options, callback) {
   if (!this.commands.hasOwnProperty(commandName)) {
     return this.help(options, callback);
   }
-  args = Utils.alignArgs(this.commands[commandName].args, options.args);
+  args = ArgParser.align(this.commands[commandName].args, options.args || []);
   if (args !== false) {
     modifiedOptions.args = args;
     return this[commandName](modifiedOptions, callback);

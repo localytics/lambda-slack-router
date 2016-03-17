@@ -1,92 +1,13 @@
 var sinon = require('sinon');
 var chai = require('chai');
 var expect = chai.expect;
-var SlackBot = require('./index');
+var SlackBot = require('../index');
 
 chai.use(require('sinon-chai'));
 
-describe('responses', function () {
-  it('responds with the correct ephemeral response format', function () {
-    expect(new SlackBot().ephemeralResponse('foo')).to.deep.equal({
-      response_type: 'ephemeral',
-      text: 'foo'
-    });
-  });
-
-  it('responds with the correct in-channel response format', function () {
-    expect(new SlackBot().inChannelResponse('bar')).to.deep.equal({
-      response_type: 'in_channel',
-      text: 'bar'
-    });
-  });
-
-  it('adds attachments appropriately', function () {
-    var response = new SlackBot().ephemeralResponse({
-      text: 'test',
-      attachments: [{
-        text: 'attachment'
-      }]
-    });
-
-    expect(response).to.deep.equal({
-      response_type: 'ephemeral',
-      text: 'test',
-      attachments: [{ text: 'attachment' }]
-    });
-  });
-});
-
-describe('managing commands', function () {
-  var slackbot;
-  var testCommand;
-
-  beforeEach(function () {
-    slackbot = new SlackBot();
-    testCommand = function () {};
-  });
-
-  it('adds a command with the correct description', function () {
-    slackbot.addCommand('test', 'The test command', testCommand);
-
-    expect(slackbot.test).to.equal(testCommand);
-    expect(slackbot.commands.test.desc).to.equal('The test command');
-  });
-
-  it('adds a command with the correct arguments', function () {
-    slackbot.addCommand('test arg1 arg2', 'The test command', testCommand);
-
-    expect(slackbot.test).to.equal(testCommand);
-    expect(slackbot.commands.test.args).to.deep.equal(['arg1', 'arg2']);
-  });
-
-  it('calls the correct command with the correct arguments', function () {
-    var spiedFunction = sinon.spy();
-    var callback = function () {};
-    var givenArgs;
-
-    slackbot.addCommand('test', 'test function', spiedFunction);
-    slackbot.callCommand('test', {}, callback);
-
-    givenArgs = spiedFunction.getCall(0).args;
-    expect(givenArgs[0]).to.deep.equal({ args: {} });
-    expect(givenArgs[1]).to.equal(callback);
-  });
-
-  it('restricts calling without the correct number of arguments', function () {
-    var spiedFunction = sinon.stub(slackbot, 'help');
-    var callback = function () {};
-
-    slackbot.addCommand('test arg1', 'test function', testCommand);
-    slackbot.callCommand('test', {}, callback);
-
-    expect(spiedFunction).to.have.been.calledWithExactly({}, callback);
-  });
-});
-
-describe('buildRouter', function () {
+describe('integration', function () {
   var context = {};
   var slackbot = new SlackBot({ token: 'token' });
-
   var assertHelp = function (event, commandContext) {
     var descriptions = [
       'testA: Test command A',
@@ -106,10 +27,10 @@ describe('buildRouter', function () {
   slackbot.addCommand('testA', 'Test command A', function (options, cb) {
     cb(null, this.ephemeralResponse('A response'));
   });
-  slackbot.addCommand('testB arg1 arg2', 'Test command B', function (options, cb) {
+  slackbot.addCommand(['testB', 'arg1', 'arg2'], 'Test command B', function (options, cb) {
     cb(null, this.ephemeralResponse('B response'));
   });
-  slackbot.addCommand('testC arg1 arg2...', 'Test command C', function (options, cb) {
+  slackbot.addCommand(['testC', 'arg1', 'arg2...'], 'Test command C', function (options, cb) {
     cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
   });
 
