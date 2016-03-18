@@ -28,10 +28,10 @@ describe('integration', function () {
     slackbot.addCommand('testA', 'Test command A', function (options, cb) {
       cb(null, this.ephemeralResponse('A response'));
     });
-    slackbot.addCommand(['testB', 'arg1', 'arg2'], 'Test command B', function (options, cb) {
+    slackbot.addCommand('testB', ['arg1', 'arg2'], 'Test command B', function (options, cb) {
       cb(null, this.ephemeralResponse('B response'));
     });
-    slackbot.addCommand(['testC', 'arg1', 'arg2...'], 'Test command C', function (options, cb) {
+    slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (options, cb) {
       cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
     });
 
@@ -134,9 +134,9 @@ describe('integration', function () {
     var context = {};
 
     var slackbot = new SlackBot({ token: 'token' });
-    var args = ['echo', 'title', { lastName: 'User' }, 'words...'];
+    var args = ['title', { lastName: 'User' }, 'words...'];
 
-    slackbot.addCommand(args, 'Greetings', function (options, callback) {
+    slackbot.addCommand('echo', args, 'Greetings', function (options, callback) {
       var response = 'Hello ' + options.args.title + ' ' + options.args.lastName;
       if (options.args.words.length) {
         response += ', ' + options.args.words.join(' ');

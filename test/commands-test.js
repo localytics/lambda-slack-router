@@ -22,7 +22,7 @@ describe('managing commands', function () {
   });
 
   it('adds a command with the correct arguments', function () {
-    slackbot.addCommand(['test', 'arg1', 'arg2'], 'The test command', testCommand);
+    slackbot.addCommand('test', ['arg1', 'arg2'], 'The test command', testCommand);
 
     expect(slackbot.test).to.equal(testCommand);
     expect(slackbot.commands.test.args).to.deep.equal(['arg1', 'arg2']);
@@ -45,7 +45,7 @@ describe('managing commands', function () {
     var spiedFunction = sinon.stub(slackbot, 'help');
     var callback = function () {};
 
-    slackbot.addCommand(['test', 'arg1'], 'test function', testCommand);
+    slackbot.addCommand('test', ['arg1'], 'test function', testCommand);
     slackbot.callCommand('test', {}, callback);
 
     expect(spiedFunction).to.have.been.calledWithExactly({}, callback);

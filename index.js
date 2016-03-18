@@ -26,17 +26,19 @@ function SlackBot(config) {
 }
 
 // add a command
-SlackBot.prototype.addCommand = function (command, desc, callback) {
-  var args = [];
-  var commandName = command;
+SlackBot.prototype.addCommand = function (command, args, desc, callback) {
+  var realCallback = callback;
+  var realDesc = desc;
+  var realArgs = args;
 
-  if (command instanceof Array) {
-    args = command.slice(1);
-    commandName = command[0];
+  if (arguments.length === 3) {
+    realCallback = desc;
+    realDesc = args;
+    realArgs = [];
   }
 
-  this[commandName] = callback;
-  this.commands[commandName] = { args: args, desc: desc };
+  this[command] = realCallback;
+  this.commands[command] = { args: realArgs, desc: realDesc };
 };
 
 // call a stored command
