@@ -31,6 +31,8 @@ SlackBot.prototype.addCommand = function (command, args, desc, callback) {
   var realDesc = desc;
   var realArgs = args;
 
+  // if only 3 arguments are passed, then we're assuming no args are used for
+  // this function, in which case we should shift all of the arguments down one
   if (arguments.length === 3) {
     realCallback = desc;
     realDesc = args;
