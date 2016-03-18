@@ -40,18 +40,18 @@ The responses for Slack can either be ephemeral (returning to the user that invo
 
 ## Arguments
 
-Commands can optionally have arguments. When commands have arguments, the router will only invoke that command if the number of arguments matches. Arguments are specified as an array in place of the command name, where the command name is the first element of the array. As an example:
+Commands can optionally have arguments. When commands have arguments, the router will only invoke that command if the number of arguments matches. Arguments are specified as an array as the second argument to `addCommand`. As an example:
 
 ```javascript
-slackbot.addCommand(['testing', 'one', 'two'], 'Testing', function (options, callback) {
+slackbot.addCommand('testing', ['one', 'two'], 'Testing', function (options, callback) {
   callback(null, this.ephemeralResponse('One: ' + options.args.one + ', Two: ' + options.args.two));
 });
 ```
 
-There are three types of arguments: required, optional, and splat. The two arguments in the above command are both required. To specify an optional command use an object where the key is the name of the argument and the value is the optional value. To specify a splat argument (one that will be an array of indeterminant length) append an ellipsis to the end of the name. An example that uses all three is below:
+There are three types of arguments: required, optional, and splat. The two arguments in the above command are both required. To specify an optional command use an object with one key where the key is the name of the argument and the value is the optional value. To specify a splat argument (one that will be an array of indeterminant length) append an ellipsis to the end of the name. An example that uses all three is below:
 
 ```javascript
-slackbot.addCommand(['echo', 'title', { lastName: 'User' }, 'words...'], 'Respond to the user', function (options, callback) {
+slackbot.addCommand('echo', ['title', { lastName: 'User' }, 'words...'], 'Respond to the user', function (options, callback) {
   var response = 'Hello ' + options.args.title + ' ' + options.args.lastName;
   if (option.args.words.length) {
     response += ', ' + options.args.words.join(' ');
