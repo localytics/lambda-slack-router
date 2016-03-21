@@ -17,6 +17,7 @@ var buildResponse = function (response_type, response) {
 function SlackBot(config) {
   this.config = config;
   this.commands = {};
+  this.aliases = {};
 }
 
 // add a command
@@ -35,6 +36,22 @@ SlackBot.prototype.addCommand = function (command, args, desc, callback) {
 
   this[command] = realCallback;
   this.commands[command] = { args: realArgs, desc: realDesc };
+};
+
+// alias a command so that it can be called by multiple names
+SlackBot.prototype.aliasCommand = function (commandName) {
+  var argIndex;
+
+  if (!this.commands.hasOwnProperty(commandName)) {
+    throw new Error(commandName + ' is not a configured command');
+  }
+
+  for (argIndex = 1; argIndex < arguments.length; argIndex++) {
+    if (this.aliases.hasOwnProperty(arguments[argIndex])) {
+      throw new Error(arguments[argIndex] + ' is already aliased or is an invalid alias name');
+    }
+    this.aliases[arguments[argIndex]] = commandName;
+  }
 };
 
 // call a stored command
@@ -65,11 +82,14 @@ SlackBot.prototype.ephemeralResponse = function (response) {
 
 // respond with a usage message
 SlackBot.prototype.help = function (options, callback) {
+  var _this = this;
   var helpText = '';
+  var aliasText;
 
   Object.keys(this.commands).forEach(function (command) {
     helpText += command;
 
+    // add argument description
     if (this.commands[command].args.length) {
       helpText += ' ' + this.commands[command].args.map(function (arg) {
         var optionalArgName;
@@ -81,6 +101,15 @@ SlackBot.prototype.help = function (options, callback) {
       }).join(' ');
     }
 
+    // add alias description
+    aliasText = Object.keys(this.aliases).filter(function (alias) {
+      return _this.aliases[alias] === command;
+    });
+    if (aliasText.length) {
+      helpText += ' (' + aliasText.join(', ') + ')';
+    }
+
+    // add command description
     helpText += ': ' + this.commands[command].desc + '\n';
   }.bind(this));
   helpText += 'help: display this help message';
@@ -104,6 +133,9 @@ SlackBot.prototype.findCommand = function (payload) {
 
   for (commandNameLength = payload.length - 1; commandNameLength > 0; commandNameLength--) {
     commandName = splitPayload.slice(0, commandNameLength).join(' ');
+    if (this.aliases.hasOwnProperty(commandName)) {
+      return { commandName: this.aliases[commandName], args: splitPayload.slice(commandNameLength) };
+    }
     if (this.commands.hasOwnProperty(commandName)) {
       return { commandName: commandName, args: splitPayload.slice(commandNameLength) };
     }

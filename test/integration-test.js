@@ -11,7 +11,7 @@ describe('integration', function () {
     var slackbot = new SlackBot({ token: 'token' });
     var assertHelp = function (event, commandContext) {
       var descriptions = [
-        'testA: Test command A',
+        'testA (tA, A): Test command A',
         'testB arg1 arg2 arg3:3: Test command B',
         'testC arg1 arg2...: Test command C',
         'help: display this help message'
@@ -34,6 +34,8 @@ describe('integration', function () {
     slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (options, cb) {
       cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
     });
+
+    slackbot.aliasCommand('testA', 'tA', 'A');
 
     beforeEach(function () {
       context.done = sinon.spy();
