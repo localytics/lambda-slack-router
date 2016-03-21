@@ -69,9 +69,18 @@ SlackBot.prototype.help = function (options, callback) {
 
   Object.keys(this.commands).forEach(function (command) {
     helpText += command;
+
     if (this.commands[command].args.length) {
-      helpText += ' ' + this.commands[command].args.join(' ');
+      helpText += ' ' + this.commands[command].args.map(function (arg) {
+        var optionalArgName;
+        if (arg instanceof Object) {
+          optionalArgName = Object.keys(arg)[0];
+          return optionalArgName + ':' + arg[optionalArgName];
+        }
+        return arg.toString();
+      }).join(' ');
     }
+
     helpText += ': ' + this.commands[command].desc + '\n';
   }.bind(this));
   helpText += 'help: display this help message';
