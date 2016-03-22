@@ -12,7 +12,7 @@ describe('integration', function () {
     var assertHelp = function (event, commandContext) {
       var descriptions = [
         'testA: Test command A',
-        'testB arg1 arg2: Test command B',
+        'testB arg1 arg2 arg3:3: Test command B',
         'testC arg1 arg2...: Test command C',
         'help: display this help message'
       ];
@@ -28,7 +28,7 @@ describe('integration', function () {
     slackbot.addCommand('testA', 'Test command A', function (options, cb) {
       cb(null, this.ephemeralResponse('A response'));
     });
-    slackbot.addCommand('testB', ['arg1', 'arg2'], 'Test command B', function (options, cb) {
+    slackbot.addCommand('testB', ['arg1', 'arg2', { arg3: 3 }], 'Test command B', function (options, cb) {
       cb(null, this.ephemeralResponse('B response'));
     });
     slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (options, cb) {
