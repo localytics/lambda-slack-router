@@ -39,6 +39,7 @@ describe('integration', function () {
 
     beforeEach(function () {
       context.done = sinon.spy();
+      context.fail = sinon.spy();
     });
 
     it('fails when the provided token is invalid', function () {
@@ -49,11 +50,7 @@ describe('integration', function () {
         }
       };
       slackbot.buildRouter()(event, context);
-
-      expect(context.done).to.have.been.calledWithExactly({
-        text: 'Invalid Slack token',
-        response_type: 'ephemeral'
-      });
+      expect(context.fail).to.have.been.calledWithExactly('Invalid Slack token');
     });
 
     it('responds with help text', function () {

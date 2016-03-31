@@ -151,7 +151,7 @@ SlackBot.prototype.buildRouter = function () {
     var foundCommand;
 
     if (!body.token || body.token !== token) {
-      return context.done(this.ephemeralResponse('Invalid Slack token'));
+      return context.fail('Invalid Slack token');
     }
 
     foundCommand = this.findCommand(body.text);
