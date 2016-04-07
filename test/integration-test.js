@@ -12,7 +12,7 @@ describe('integration', function () {
     var assertHelp = function (event, commandContext) {
       var descriptions = [
         'testA (tA, A): Test command A',
-        'testB arg1 arg2 arg3:3: Test command B',
+        'testB arg1 arg2 [arg3:3]: Test command B',
         'testC arg1 arg2...: Test command C',
         'help: display this help message'
       ];
