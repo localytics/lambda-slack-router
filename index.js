@@ -95,7 +95,8 @@ SlackBot.prototype.help = function (options, callback) {
         var optionalArgName;
         var configuredArgName;
         var configuredArgOpts;
-        var configuredArgHelpText;
+        var configuredArgHelpText = '';
+        var configuredArgRestrictText = '';
         var argType = ArgParser.typeOf(arg);
         if (argType === 'opt') {
           optionalArgName = Object.keys(arg)[0];
@@ -103,19 +104,20 @@ SlackBot.prototype.help = function (options, callback) {
         } else if (argType === 'configured') {
           configuredArgName = Object.keys(arg)[0];
           configuredArgOpts = arg[configuredArgName];
-          configuredArgHelpText = '';
-          if (configuredArgOpts.default) {
-            configuredArgHelpText = '[' + configuredArgName + ':' + configuredArgOpts.default + ']';
-          } else {
-            configuredArgHelpText = configuredArgName;
-          }
           if (configuredArgOpts.restrict) {
             if (configuredArgOpts.restrict instanceof Array) {
-              configuredArgHelpText += ' (' + configuredArgOpts.restrict.join('|') + ')';
+              configuredArgRestrictText = ' (' + configuredArgOpts.restrict.join('|') + ')';
             } else {
-              configuredArgHelpText += ' (' + configuredArgOpts.restrict.toString() + ')';
+              configuredArgRestrictText = ' (' + configuredArgOpts.restrict.toString() + ')';
             }
           }
+          if (configuredArgOpts.default) {
+            configuredArgHelpText = '[' + configuredArgName + ':' +
+              configuredArgOpts.default + ' ' + configuredArgRestrictText + ']';
+          } else {
+            configuredArgHelpText = configuredArgName + configuredArgRestrictText;
+          }
+
           return configuredArgHelpText;
         }
         return arg.toString();
