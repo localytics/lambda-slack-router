@@ -93,9 +93,32 @@ SlackBot.prototype.help = function (options, callback) {
     if (this.commands[command].args.length) {
       helpText += ' ' + this.commands[command].args.map(function (arg) {
         var optionalArgName;
-        if (arg instanceof Object) {
+        var configuredArgName;
+        var configuredArgOpts;
+        var configuredArgHelpText = '';
+        var configuredArgRestrictText = '';
+        var argType = ArgParser.typeOf(arg);
+        if (argType === 'opt') {
           optionalArgName = Object.keys(arg)[0];
-          return optionalArgName + ':' + arg[optionalArgName];
+          return '[' + optionalArgName + ':' + arg[optionalArgName] + ']';
+        } else if (argType === 'configured') {
+          configuredArgName = Object.keys(arg)[0];
+          configuredArgOpts = arg[configuredArgName];
+          if (configuredArgOpts.restrict) {
+            if (configuredArgOpts.restrict instanceof Array) {
+              configuredArgRestrictText = ' (' + configuredArgOpts.restrict.join('|') + ')';
+            } else {
+              configuredArgRestrictText = ' (' + configuredArgOpts.restrict.toString() + ')';
+            }
+          }
+          if (configuredArgOpts.default) {
+            configuredArgHelpText = '[' + configuredArgName + ':' +
+              configuredArgOpts.default + ' ' + configuredArgRestrictText + ']';
+          } else {
+            configuredArgHelpText = configuredArgName + configuredArgRestrictText;
+          }
+
+          return configuredArgHelpText;
         }
         return arg.toString();
       }).join(' ');

@@ -52,6 +52,44 @@ describe('arg-parser', function () {
         expect(ArgParser.align([{ a: 1 }, { b: 2 }], [])).to.deep.equal({ a: 1, b: 2 });
       });
     });
+
+    describe('configured', function () {
+      it('allows nested objects to be passed instead of strings', function () {
+        expect(ArgParser.align(['a', { b: {} }], [1, 2])).to.deep.equal({ a: 1, b: 2 });
+      });
+
+      it('allows a default value in the nested object', function () {
+        expect(ArgParser.align(['a', { b: { default: 2 } }], [1])).to.deep.equal({ a: 1, b: 2 });
+      });
+
+      it('allows for restricting the value in the nested object', function () {
+        expect(ArgParser.align(['a', { b: { restrict: 2 } }], [1, 2])).to.deep.equal({ a: 1, b: 2 });
+      });
+
+      it('can restrict the value to a number', function () {
+        expect(ArgParser.align(['a', { b: { restrict: 2 } }], [1, 3])).to.be.false();
+      });
+
+      it('can restrict the value to a string', function () {
+        expect(ArgParser.align(['a', { b: { restrict: 'c' } }], [1, 'd'])).to.be.false();
+      });
+
+      it('can restrict the value to an array of values', function () {
+        expect(ArgParser.align(['a', { b: { restrict: [2, 3, 4] } }], [1, 5])).to.be.false();
+      });
+
+      it('correctly overrides defaults when a value is given', function () {
+        expect(ArgParser.align(['a', { b: { default: 2 } }], [1, 3])).to.deep.equal({ a: 1, b: 3 });
+      });
+
+      it('correctly overrides defaults when the value given does not meet the restrictions', function () {
+        expect(ArgParser.align(['a', { b: { default: 2, restrict: 2 } }], [1, 3])).to.be.false();
+      });
+
+      it('throws an error if the restrict type is not one of string, number, or array', function () {
+        expect(ArgParser.align.bind(['a', { b: { restrict: {} } }], [1, 2])).to.throw(TypeError);
+      });
+    });
   });
 
   describe('validate', function () {
