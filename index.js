@@ -55,19 +55,19 @@ SlackBot.prototype.aliasCommand = function (commandName) {
 };
 
 // call a stored command
-SlackBot.prototype.callCommand = function (commandName, options, callback) {
+SlackBot.prototype.callCommand = function (commandName, event, callback) {
   var args;
-  var modifiedOptions = options;
+  var modifiedEvent = event;
 
   if (!this.commands.hasOwnProperty(commandName)) {
-    return this.help(options, callback);
+    return this.help(event, callback);
   }
-  args = ArgParser.align(this.commands[commandName].args, options.args || []);
+  args = ArgParser.align(this.commands[commandName].args, event.args || []);
   if (args !== false) {
-    modifiedOptions.args = args;
-    return this[commandName](modifiedOptions, callback);
+    modifiedEvent.args = args;
+    return this[commandName](modifiedEvent, callback);
   }
-  return this.help(options, callback);
+  return this.help(event, callback);
 };
 
 // respond to the whole channel
@@ -81,7 +81,7 @@ SlackBot.prototype.ephemeralResponse = function (response) {
 };
 
 // respond with a usage message
-SlackBot.prototype.help = function (options, callback) {
+SlackBot.prototype.help = function (event, callback) {
   var _this = this;
   var helpText = '';
   var aliasText;
@@ -147,6 +147,7 @@ SlackBot.prototype.findCommand = function (payload) {
 SlackBot.prototype.buildRouter = function () {
   return function (event, context) {
     var body = qs.parse(event.body);
+    var builtEvent = event;
     var token = this.config.token;
     var foundCommand;
 
@@ -155,10 +156,8 @@ SlackBot.prototype.buildRouter = function () {
     }
 
     foundCommand = this.findCommand(body.text);
-    return this.callCommand(foundCommand.commandName, {
-      userName: body.user_name,
-      args: foundCommand.args
-    }, context.done);
+    builtEvent.args = foundCommand.args;
+    return this.callCommand(foundCommand.commandName, builtEvent, context.done);
   }.bind(this);
 };
 
