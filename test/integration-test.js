@@ -25,14 +25,14 @@ describe('integration', function () {
       });
     };
 
-    slackbot.addCommand('testA', 'Test command A', function (options, cb) {
+    slackbot.addCommand('testA', 'Test command A', function (event, cb) {
       cb(null, this.ephemeralResponse('A response'));
     });
-    slackbot.addCommand('testB', ['arg1', 'arg2', { arg3: 3 }], 'Test command B', function (options, cb) {
+    slackbot.addCommand('testB', ['arg1', 'arg2', { arg3: 3 }], 'Test command B', function (event, cb) {
       cb(null, this.ephemeralResponse('B response'));
     });
-    slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (options, cb) {
-      cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
+    slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (event, cb) {
+      cb(null, this.ephemeralResponse(event.args.arg2.join(' ')));
     });
 
     slackbot.aliasCommand('testA', 'tA', 'A');
@@ -127,6 +127,22 @@ describe('integration', function () {
         response_type: 'ephemeral'
       });
     });
+
+    it('passes the entire event on to the command', function () {
+      var event = {
+        body: {
+          token: 'token',
+          text: 'testC arg1 arg2'
+        },
+        foo: 'bar'
+      };
+      var stub = sinon.stub(slackbot, 'testC');
+      slackbot.buildRouter()(event, context);
+
+      event.args = { arg1: 'arg1', arg2: ['arg2'] };
+      expect(stub).to.have.been.calledWithExactly(event, context.done);
+      stub.restore();
+    });
   });
 
   describe('examples', function () {
@@ -135,10 +151,10 @@ describe('integration', function () {
     var slackbot = new SlackBot({ token: 'token' });
     var args = ['title', { lastName: 'User' }, 'words...'];
 
-    slackbot.addCommand('echo', args, 'Greetings', function (options, callback) {
-      var response = 'Hello ' + options.args.title + ' ' + options.args.lastName;
-      if (options.args.words.length) {
-        response += ', ' + options.args.words.join(' ');
+    slackbot.addCommand('echo', args, 'Greetings', function (event, callback) {
+      var response = 'Hello ' + event.args.title + ' ' + event.args.lastName;
+      if (event.args.words.length) {
+        response += ', ' + event.args.words.join(' ');
       }
       callback(null, this.ephemeralResponse(response));
     });
