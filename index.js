@@ -15,7 +15,7 @@ var buildResponse = function (response_type, response) {
 
 // wraps logic around routing
 function SlackBot(config) {
-  this.config = config;
+  this.config = config || {};
   this.commands = {};
   this.aliases = {};
 }
@@ -148,10 +148,9 @@ SlackBot.prototype.buildRouter = function () {
   return function (event, context) {
     var body = qs.parse(event.body);
     var builtEvent = event;
-    var token = this.config.token;
     var foundCommand;
 
-    if (!body.token || body.token !== token) {
+    if (this.config.token && (!body.token || body.token !== this.config.token)) {
       return context.fail('Invalid Slack token');
     }
 
