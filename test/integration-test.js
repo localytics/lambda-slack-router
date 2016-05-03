@@ -178,4 +178,23 @@ describe('integration', function () {
       });
     });
   });
+
+  describe('no token provided', function () {
+    var context = {};
+    var slackbot = new SlackBot();
+
+    slackbot.addCommand('test', 'Test', function (event, cb) {
+      cb(null, this.ephemeralResponse('test'));
+    });
+
+    beforeEach(function () {
+      context.done = sinon.spy();
+    });
+
+    it('does not raise an error for no token passed', function () {
+      var event = { body: { text: 'test' } };
+      slackbot.buildRouter()(event, context);
+      expect(context.done).to.have.been.calledWithExactly(null, slackbot.ephemeralResponse('test'));
+    });
+  });
 });
