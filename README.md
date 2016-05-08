@@ -39,6 +39,15 @@ The two arguments passed to the command callback are `event` and `callback`. The
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
 
+## Security
+
+Slackbots can optionally be locked down with the token provided by slack. If provided, the token will be checked against each request. It is recommended to provide a token whenever possible, as the endpoint is otherwise vulnerable to exploitation. It is usually easiest to maintain the token in an environment variable, like so:
+
+```javascript
+var SlackBot = require('lambda-slack-router');
+var slackbot = new SlackBot({ token: process.env.SLACK_VERIFICATION_TOKEN });
+```
+
 ## Arguments
 
 Commands can optionally have arguments. When commands have arguments, the router will only invoke that command if the number of arguments matches. Arguments are specified as an array as the second argument to `addCommand`. As an example:
@@ -75,7 +84,7 @@ It's helpful in testing your function to also export the slackbot itself. If it'
 
 ```javascript
 var expect = require('chai').expect;
-  slackBot = require('../slackbot/handler').slackBot;
+  slackbot = require('../slackbot/handler').slackbot;
 
 describe('slackbot', function () {
   it('responds to ping', function () {
@@ -84,11 +93,11 @@ describe('slackbot', function () {
       receivedArgs = [error, success];
     };
 
-    slackBot.ping(null, callback);
+    slackbot.ping(null, callback);
     expect(received).to.be.true;
-    expect(receivedArgs).to.deep.eq([null, slackBot.inChannelResponse('Hello World')]);
+    expect(receivedArgs).to.deep.eq([null, slackbot.inChannelResponse('Hello World')]);
   });
 });
 ```
 
-assuming your handler is named index.js and you had `exports.slackBot = slackBot` in your handler.
+assuming your handler is named index.js and you had `exports.slackbot = slackbot` in your handler.
