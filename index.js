@@ -146,9 +146,9 @@ SlackBot.prototype.findCommand = function (payload) {
 // control the flow of queries from Slack
 SlackBot.prototype.buildRouter = function () {
   return function (event, context) {
+    var foundCommand;
     var builtEvent = event;
     builtEvent.body = qs.parse(builtEvent.body);
-    var foundCommand;
 
     if (this.config.token && (!builtEvent.body.token || builtEvent.body.token !== this.config.token)) {
       return context.fail('Invalid Slack token');
