@@ -5,10 +5,9 @@ var qs = require('qs');
 
 // build a response to return to Slack
 var buildResponse = function (response_type, response) {
-
   var modifiedResponse = response;
   if (typeof response === 'string') {
-    return { response_type: response_type, text: response }; //Need to be  able to respond with response_url as well
+    return { response_type: response_type, text: response };
   }
   modifiedResponse.response_type = response_type;
   return modifiedResponse;
