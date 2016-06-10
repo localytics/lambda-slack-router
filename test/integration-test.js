@@ -8,8 +8,10 @@ chai.use(require('sinon-chai'));
 describe('integration', function () {
   describe('testbot', function () {
     var context = {};
+    var callback = null;
     var slackbot = new SlackBot({ token: 'token' });
-    var assertHelp = function (event, commandContext) {
+
+    var assertHelp = function (event, lambdaContext, lambdaCallback) {
       var descriptions = [
         'testA (tA, A): Test command A',
         'testB arg1 arg2 arg3:3: Test command B',
@@ -17,8 +19,8 @@ describe('integration', function () {
         'help: display this help message'
       ];
 
-      slackbot.buildRouter()(event, commandContext);
-      expect(commandContext.done).to.have.been.calledWithExactly(null, {
+      slackbot.buildRouter()(event, lambdaContext, lambdaCallback);
+      expect(lambdaCallback).to.have.been.calledWithExactly(null, {
         text: 'Available commands:',
         attachments: [{ text: descriptions.join('\n') }],
         response_type: 'ephemeral'
@@ -38,7 +40,7 @@ describe('integration', function () {
     slackbot.aliasCommand('testA', 'tA', 'A');
 
     beforeEach(function () {
-      context.done = sinon.spy();
+      callback = sinon.spy();
       context.fail = sinon.spy();
     });
 
@@ -49,7 +51,7 @@ describe('integration', function () {
           text: 'help'
         }
       };
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, context, callback);
       expect(context.fail).to.have.been.calledWithExactly('Invalid Slack token');
     });
 
@@ -60,7 +62,7 @@ describe('integration', function () {
           text: 'help'
         }
       };
-      assertHelp(event, context);
+      assertHelp(event, context, callback);
     });
 
     it('routes to the help text by default', function () {
@@ -70,7 +72,7 @@ describe('integration', function () {
           text: ''
         }
       };
-      assertHelp(event, context);
+      assertHelp(event, context, callback);
     });
 
     it('routes to the help text when invalid command is specified', function () {
@@ -80,7 +82,7 @@ describe('integration', function () {
           text: 'invalid'
         }
       };
-      assertHelp(event, context);
+      assertHelp(event, context, callback);
     });
 
     it('routes to the appropriate command name', function () {
@@ -90,9 +92,9 @@ describe('integration', function () {
           text: 'testA'
         }
       };
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, context, callback);
 
-      expect(context.done).to.have.been.calledWithExactly(null, {
+      expect(callback).to.have.been.calledWithExactly(null, {
         text: 'A response',
         response_type: 'ephemeral'
       });
@@ -105,9 +107,9 @@ describe('integration', function () {
           text: 'testC these are all my words'
         }
       };
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, context, callback);
 
-      expect(context.done).to.have.been.calledWithExactly(null, {
+      expect(callback).to.have.been.calledWithExactly(null, {
         text: 'are all my words',
         response_type: 'ephemeral'
       });
@@ -120,9 +122,9 @@ describe('integration', function () {
           text: 'testC arg1 arg2'
         }
       };
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, context, callback);
 
-      expect(context.done).to.have.been.calledWithExactly(null, {
+      expect(callback).to.have.been.calledWithExactly(null, {
         text: 'arg2',
         response_type: 'ephemeral'
       });
@@ -137,17 +139,16 @@ describe('integration', function () {
         foo: 'bar'
       };
       var stub = sinon.stub(slackbot, 'testC');
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, context, callback);
 
       event.args = { arg1: 'arg1', arg2: ['arg2'] };
-      expect(stub).to.have.been.calledWithExactly(event, context.done);
+      expect(stub).to.have.been.calledWithExactly(event, callback);
       stub.restore();
     });
   });
 
   describe('examples', function () {
-    var context = {};
-
+    var lambdaCallback = null;
     var slackbot = new SlackBot({ token: 'token' });
     var args = ['title', { lastName: 'User' }, 'words...'];
 
@@ -156,11 +157,11 @@ describe('integration', function () {
       if (event.args.words.length) {
         response += ', ' + event.args.words.join(' ');
       }
-      callback(null, this.ephemeralResponse(response));
+      callback(null, slackbot.ephemeralResponse(response));
     });
 
     beforeEach(function () {
-      context.done = sinon.spy();
+      lambdaCallback = sinon.spy();
     });
 
     it('returns the expected response', function () {
@@ -170,9 +171,9 @@ describe('integration', function () {
           text: 'echo Sir User how are you today?'
         }
       };
-      slackbot.buildRouter()(event, context);
+      slackbot.buildRouter()(event, {}, lambdaCallback);
 
-      expect(context.done).to.have.been.calledWithExactly(null, {
+      expect(lambdaCallback).to.have.been.calledWithExactly(null, {
         text: 'Hello Sir User, how are you today?',
         response_type: 'ephemeral'
       });
@@ -180,21 +181,21 @@ describe('integration', function () {
   });
 
   describe('no token provided', function () {
-    var context = {};
+    var lambdaCallback = null;
     var slackbot = new SlackBot();
 
-    slackbot.addCommand('test', 'Test', function (event, cb) {
-      cb(null, this.ephemeralResponse('test'));
+    slackbot.addCommand('test', 'Test', function (event, callback) {
+      callback(null, this.ephemeralResponse('test'));
     });
 
     beforeEach(function () {
-      context.done = sinon.spy();
+      lambdaCallback = sinon.spy();
     });
 
     it('does not raise an error for no token passed', function () {
       var event = { body: { text: 'test' } };
-      slackbot.buildRouter()(event, context);
-      expect(context.done).to.have.been.calledWithExactly(null, slackbot.ephemeralResponse('test'));
+      slackbot.buildRouter()(event, {}, lambdaCallback);
+      expect(lambdaCallback).to.have.been.calledWithExactly(null, slackbot.ephemeralResponse('test'));
     });
   });
 });
