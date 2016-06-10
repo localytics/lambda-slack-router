@@ -145,7 +145,7 @@ SlackBot.prototype.findCommand = function (payload) {
 
 // control the flow of queries from Slack
 SlackBot.prototype.buildRouter = function () {
-  return function (event, context) {
+  return function (event, context, callback) {
     var foundCommand;
     var builtEvent = event;
     builtEvent.body = qs.parse(builtEvent.body);
@@ -156,7 +156,7 @@ SlackBot.prototype.buildRouter = function () {
 
     foundCommand = this.findCommand(builtEvent.body.text);
     builtEvent.args = foundCommand.args;
-    return this.callCommand(foundCommand.commandName, builtEvent, context.done);
+    return this.callCommand(foundCommand.commandName, builtEvent, callback);
   }.bind(this);
 };
 
