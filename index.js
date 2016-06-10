@@ -146,15 +146,15 @@ SlackBot.prototype.findCommand = function (payload) {
 // control the flow of queries from Slack
 SlackBot.prototype.buildRouter = function () {
   return function (event, context) {
-    var body = qs.parse(event.body);
-    var builtEvent = event;
     var foundCommand;
+    var builtEvent = event;
+    builtEvent.body = qs.parse(builtEvent.body);
 
-    if (this.config.token && (!body.token || body.token !== this.config.token)) {
+    if (this.config.token && (!builtEvent.body.token || builtEvent.body.token !== this.config.token)) {
       return context.fail('Invalid Slack token');
     }
 
-    foundCommand = this.findCommand(body.text);
+    foundCommand = this.findCommand(builtEvent.body.text);
     builtEvent.args = foundCommand.args;
     return this.callCommand(foundCommand.commandName, builtEvent, context.done);
   }.bind(this);
