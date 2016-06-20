@@ -149,7 +149,8 @@ SlackBot.prototype.buildRouter = function () {
     var foundCommand;
     var builtEvent = event;
 
-    if (builtEvent.body === 'ping') {
+    if (this.config.pingEnabled && event.source && event.source === 'aws.events' &&
+      event.resources && event.resources[0].indexOf('ping') !== -1) {
       return context.succeed('Ok');
     }
 

@@ -200,10 +200,24 @@ describe('integration', function () {
   });
 
   describe('ping command', function () {
+    var pingEvent = { source: 'aws.events', resources: ['test-ping-test'], body: { text: 'test' } };
+
     it('returns quickly', function () {
       var succeed = sinon.spy();
-      new SlackBot().buildRouter()({ body: 'ping' }, { succeed: succeed });
+      new SlackBot({ pingEnabled: true }).buildRouter()(pingEvent, { succeed: succeed });
       expect(succeed).to.have.been.calledWithExactly('Ok');
+    });
+
+    it('ignores when pingEnabled is falsy', function () {
+      var slackbot = new SlackBot();
+      var lambdaCallback = sinon.spy();
+
+      slackbot.addCommand('test', 'Test', function (event, callback) {
+        callback('foobar');
+      });
+
+      slackbot.buildRouter()(pingEvent, {}, lambdaCallback);
+      expect(lambdaCallback).to.have.been.calledWithExactly('foobar');
     });
   });
 });
