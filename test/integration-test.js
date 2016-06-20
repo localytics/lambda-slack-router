@@ -198,4 +198,12 @@ describe('integration', function () {
       expect(lambdaCallback).to.have.been.calledWithExactly(null, slackbot.ephemeralResponse('test'));
     });
   });
+
+  describe('ping command', function () {
+    it('returns quickly', function () {
+      var succeed = sinon.spy();
+      new SlackBot().buildRouter()({ body: 'ping' }, { succeed: succeed });
+      expect(succeed).to.have.been.calledWithExactly('Ok');
+    });
+  });
 });

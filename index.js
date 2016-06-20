@@ -148,8 +148,12 @@ SlackBot.prototype.buildRouter = function () {
   return function (event, context, callback) {
     var foundCommand;
     var builtEvent = event;
-    builtEvent.body = qs.parse(builtEvent.body);
 
+    if (builtEvent.body === 'ping') {
+      return context.succeed('Ok');
+    }
+
+    builtEvent.body = qs.parse(builtEvent.body);
     if (this.config.token && (!builtEvent.body.token || builtEvent.body.token !== this.config.token)) {
       return context.fail('Invalid Slack token');
     }
