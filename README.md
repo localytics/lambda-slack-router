@@ -44,8 +44,34 @@ The responses for Slack can either be ephemeral (returning to the user that invo
 Slackbots can optionally be locked down with the token provided by slack. If provided, the token will be checked against each request. It is recommended to provide a token whenever possible, as the endpoint is otherwise vulnerable to exploitation. It is usually easiest to maintain the token in an environment variable, like so:
 
 ```javascript
-var SlackBot = require('lambda-slack-router');
 var slackbot = new SlackBot({ token: process.env.SLACK_VERIFICATION_TOKEN });
+```
+
+## Cold Start
+
+After uploading a new version of your lambda function or extended periods of inactivity, AWS spins down your lambda in order to conserve resources. This results in the lambda being in a "cold" state, and the next time it is accessed it must spin up again, resulting in a "cold start penalty." This can be especially problematic for slackbots, as the extra time needed to spin up the lambda can take longer than slack is willing to wait for a response. To mediate this, you can set `pingEnabled` to true in the slackbot config and set up a CloudWatch event that will ping your lambda every 5 minutes to keep it running hot. Below is an example of the necessary configuration:
+
+```javascript
+var slackbot = new SlackBot({ pingEnabled: true });
+```
+
+![CloudWatch configuration](doc/cloudwatch-configuration.png)
+
+If you're using Serverless to configure your lambda project, you can add the following to your `s-function.json` file to configure the event source on function deploy:
+
+```json
+{
+  "events": [
+    {
+      "name": "ping-slackbot",
+      "type": "schedule",
+      "config": {
+        "schedule": "rate(5 minutes)",
+        "enabled": true
+      }
+    }
+  ]
+}
 ```
 
 ## Arguments
@@ -84,7 +110,7 @@ It's helpful in testing your function to also export the slackbot itself. If it'
 
 ```javascript
 var expect = require('chai').expect;
-  slackbot = require('../slackbot/handler').slackbot;
+var slackbot = require('../slackbot/handler').slackbot;
 
 describe('slackbot', function () {
   it('responds to ping', function () {
