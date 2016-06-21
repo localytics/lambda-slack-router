@@ -55,7 +55,24 @@ After uploading a new version of your lambda function or extended periods of ina
 var slackbot = new SlackBot({ pingEnabled: true });
 ```
 
-![CloudWatch configuration](doc/cloudwatch-alarm.png)
+![CloudWatch configuration](doc/cloudwatch-configuration.png)
+
+If you're using Serverless to configure your lambda project, you can add the following to your `s-function.json` file to configure the event source on function deploy:
+
+```json
+{
+  "events": [
+    {
+      "name": "ping-slackbot",
+      "type": "schedule",
+      "config": {
+        "schedule": "rate(5 minutes)",
+        "enabled": true
+      }
+    }
+  ]
+}
+```
 
 ## Arguments
 
