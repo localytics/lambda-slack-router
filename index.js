@@ -70,6 +70,24 @@ SlackBot.prototype.callCommand = function (commandName, event, callback) {
   return this.help(event, callback);
 };
 
+// add an action
+SlackBot.prototype.addAction = function (action, callback) {
+  if (!this[action]) {
+    this[action] = callback;
+  } else {
+    throw new Error('Action ' + action + ' is already defined as a command or action');
+  }
+};
+
+// process an action
+SlackBot.prototype.processAction = function (action, event, callback) {
+  if (!this[action]) {
+    throw new Error('Tried to process ' + action + ' but did not find the corresponding action');
+  } else {
+    return this[action](event, callback);
+  }
+};
+
 // respond to the whole channel
 SlackBot.prototype.inChannelResponse = function (response) {
   return buildResponse('in_channel', response);
@@ -147,6 +165,7 @@ SlackBot.prototype.findCommand = function (payload) {
 SlackBot.prototype.buildRouter = function () {
   return function (event, context, callback) {
     var foundCommand;
+    var foundAction;
     var builtEvent = event;
 
     if (this.config.pingEnabled && event.source && event.source === 'aws.events' &&
@@ -155,10 +174,20 @@ SlackBot.prototype.buildRouter = function () {
     }
 
     builtEvent.body = qs.parse(builtEvent.body);
+    if(builtEvent.body.payload) {
+      builtEvent.body = JSON.parse(builtEvent.body.payload);
+    }
+
     if (this.config.token && (!builtEvent.body.token || builtEvent.body.token !== this.config.token)) {
       return context.fail('Invalid Slack token');
     }
 
+    // Handle actions from slack buttons
+    if (builtEvent.body.actions) {
+      // Though presented as an array, slack will only send a single action per incoming invocation.
+      foundAction = builtEvent.body.actions[0].name;
+      return this.processAction(foundAction, builtEvent, callback);
+    } // Else route to commands
     foundCommand = this.findCommand(builtEvent.body.text);
     builtEvent.args = foundCommand.args;
     return this.callCommand(foundCommand.commandName, builtEvent, callback);
