@@ -174,7 +174,7 @@ SlackBot.prototype.buildRouter = function () {
     }
 
     builtEvent.body = qs.parse(builtEvent.body);
-    if(builtEvent.body.payload) {
+    if (builtEvent.body.payload) {
       builtEvent.body = JSON.parse(builtEvent.body.payload);
     }
 
