@@ -36,6 +36,9 @@ describe('integration', function () {
     slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (event, cb) {
       cb(null, this.ephemeralResponse(event.args.arg2.join(' ')));
     });
+    slackbot.addAction('testButtonAction', function (event, cb) {
+      cb(null, { text: 'You pressed the ' + event.body.actions[0].name + ' button' });
+    });
 
     slackbot.aliasCommand('testA', 'tA', 'A');
 
@@ -98,6 +101,16 @@ describe('integration', function () {
         text: 'A response',
         response_type: 'ephemeral'
       });
+    });
+
+    it('routes to the appropriate action', function () {
+      var event = {
+        body: 'payload={\"actions\":[{\"name\":\"testButtonAction\",\"value\":\"testValue\"}],\"token\":\"token\"}'
+      };
+      slackbot.buildRouter()(event, context, callback);
+
+      expect(callback).to.have.been.calledWithExactly(null,
+        { text: 'You pressed the testButtonAction button' });
     });
 
     it('supports splatting the last argument', function () {
