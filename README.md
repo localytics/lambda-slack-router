@@ -39,6 +39,18 @@ The two arguments passed to the command callback are `event` and `callback`. The
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
 
+## Responding to Buttons with Actions
+
+See the [slack documentation](https://api.slack.com/docs/message-buttons) for more information on buttons.
+The action configured must match the `name` value of the presented button.
+There's no need to use inChannelResponse or ephemeralResponse since your provided message will replace the existing message when using the callback.
+
+```javascript
+slackbot.addAction('buttonPress', function (event, callback) {
+  callback(null, { text: "You pressed a button" });
+});
+```
+
 ## Security
 
 Slackbots can optionally be locked down with the token provided by slack. If provided, the token will be checked against each request. It is recommended to provide a token whenever possible, as the endpoint is otherwise vulnerable to exploitation. It is usually easiest to maintain the token in an environment variable, like so:
