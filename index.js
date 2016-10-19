@@ -12,7 +12,7 @@ function SlackBot(config) {
   if (!this.config.structureResponse) {
     this.config.structureResponse = function (response) {
       return response;
-    }
+    };
   }
 }
 

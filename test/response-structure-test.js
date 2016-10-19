@@ -18,7 +18,7 @@ describe('structureResponse', function () {
     });
 
     expect(slackbot.inChannelResponse('bar')).to.deep.equal({
-      body: "{\"response_type\":\"in_channel\",\"text\":\"bar\"}"
+      body: '{"response_type":"in_channel","text":"bar"}'
     });
   });
 });
