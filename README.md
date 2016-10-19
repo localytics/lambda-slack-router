@@ -39,6 +39,26 @@ The two arguments passed to the command callback are `event` and `callback`. The
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
 
+### Response Structure
+
+By default, the SlackBot will respond with the exact structure that slack expects. This will function properly using [our scaffold](https://github.com/localytics/serverless-slackbot-scaffold) because of the request template that we constructed:
+
+```json
+"requestTemplates": {
+  "application/x-www-form-urlencoded": "{\"body\" : $input.json(\"$\")}"
+}
+```
+
+You can, however, set up your own function to build the structure of your responses by setting the `structureResponse` property of the configuration object that you pass to the SlackBot constructor. This example below will be sufficient to get API gateway working out of the box:
+
+```javascript
+var slackbot = new SlackBot({
+  structureResponse: function (response) {
+    return { body: JSON.stringify(response) };
+  }
+});
+```
+
 ## Responding to Buttons with Actions
 
 See the [slack documentation](https://api.slack.com/docs/message-buttons) for more information on buttons.

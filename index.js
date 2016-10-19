@@ -3,22 +3,29 @@
 var ArgParser = require('./lib/arg-parser');
 var qs = require('qs');
 
-// build a response to return to Slack
-var buildResponse = function (response_type, response) {
-  var modifiedResponse = response;
-  if (typeof response === 'string') {
-    return { response_type: response_type, text: response };
-  }
-  modifiedResponse.response_type = response_type;
-  return modifiedResponse;
-};
-
 // wraps logic around routing
 function SlackBot(config) {
   this.config = config || {};
   this.commands = {};
   this.aliases = {};
+
+  if (!this.config.structureResponse) {
+    this.config.structureResponse = function (response) {
+      return response;
+    }
+  }
 }
+
+// build a response to return to Slack
+SlackBot.prototype._buildResponse = function (response_type, response) {
+  var modifiedResponse = response;
+  if (typeof response === 'string') {
+    modifiedResponse = { response_type: response_type, text: response };
+  } else {
+    modifiedResponse.response_type = response_type;
+  }
+  return this.config.structureResponse(modifiedResponse);
+};
 
 // add a command
 SlackBot.prototype.addCommand = function (command, args, desc, callback) {
@@ -90,12 +97,12 @@ SlackBot.prototype.processAction = function (action, event, callback) {
 
 // respond to the whole channel
 SlackBot.prototype.inChannelResponse = function (response) {
-  return buildResponse('in_channel', response);
+  return this._buildResponse('in_channel', response);
 };
 
 // respond to just the requesting user
 SlackBot.prototype.ephemeralResponse = function (response) {
-  return buildResponse('ephemeral', response);
+  return this._buildResponse('ephemeral', response);
 };
 
 // respond with a usage message
