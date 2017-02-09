@@ -61,14 +61,7 @@ var slackbot = new SlackBot({
 
 ## Responding to Buttons with Actions
 
-Before you can have `Buttons with Actions` you will need to setup a SlackApp, here are the steps to achieve this without the need to submit the App:
-
-* Open up your app settings at http://api.slack.com/apps.
-* From the Basic Information screen, copy your Client ID and Client Secret into a local text doc.
-* On the OAuth & Permissions screen, set your Redirect URL to: https://slack.com/api/oauth.access?client_id=CLIENT_ID_FROM_PREVIOUS_SCREEN&client_secret=CLIENT_SECRET_FROM_PREVIOUS_SCREEN then click Save Changes (this is a shortcut that will let you install the app without all the bother of scripting an OAuth handshake).
-* Now to install! Load up https://slack.com/oauth/authorize?client_id=CLIENT_ID_FROM_PREVIOUS_SCREEN&scope=YOUR,REQUIRED,SCOPES in your browser and select the scopes your app requires.
-* Proceed through authorization. After authorizing the app you'll be redirected to the oauth.access API method which returns blob of JSON. Included are the relevant tokens (the access token provides permissions to call API methods on behalf of the user, and the bot token can be used for bot activity).
-* That's it! Your app is installed and you have the necessary tokens to connect your app/bot and make API calls. If you require other permissions, simply repeat the same install steps and modify the scope parameter. If you want to know more about the OAuth flow and how this works just head here: https://api.slack.com/docs/oauth
+Before you can have `Buttons with Actions` you will need to setup a [SlackApp][https://api.slack.com/slack-apps], note you do not need to publicly publish your SlackApp to utilize the Slack buttons.
 
 See the [slack documentation](https://api.slack.com/docs/message-buttons) for more information on buttons.
 
