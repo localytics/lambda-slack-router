@@ -1,9 +1,9 @@
 # lambda-slack-router
 
-[![Build Status][1]][2]
-[![NPM Version][3]][4]
+[![Build Status](https://travis-ci.org/localytics/lambda-slack-router.svg?branch=master)](https://travis-ci.org/localytics/lambda-slack-router)
+[![NPM Version](https://img.shields.io/npm/v/lambda-slack-router.svg)](https://www.npmjs.com/package/lambda-slack-router)
 
-`lambda-slack-router` is a pattern for building [Slack slash commands][5] using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
+`lambda-slack-router` is a pattern for building [Slack slash commands](https://api.slack.com/slash-commands) using the Amazon AWS Lambda service and Node.js. It functions as a single endpoint that receives a JSON payload from Slack and returns an appropriate response. For instance, if you were to enter
 
     /testbot ping
 
@@ -15,7 +15,7 @@ and a usage message will be returned.
 
 ## Installation
 
-This package is [hosted on npm][4]. From the root of your project run:
+This package is [hosted on npm](https://www.npmjs.com/package/lambda-slack-router). From the root of your project run:
 
     $ npm install --save lambda-slack-router
 
@@ -35,13 +35,13 @@ In the above code, a slackbot is created with the given token (used for verifyin
 
 The first argument to the `addCommand` function is the name of the command. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
 
-The two arguments passed to the command callback are `event` and `callback`. The `event` object contains all of the properties that came from lambda, as well as the `args` property (the arguments passed to the function, as an object). The callback function is the same as the `context.done` function that's built into [lambda][6]. The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
+The two arguments passed to the command callback are `event` and `callback`. The `event` object contains all of the properties that came from lambda, as well as the `args` property (the arguments passed to the function, as an object). The callback function is the same as the `context.done` function that's built into [lambda](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html). The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
 
 ### Response Structure
 
-By default, the SlackBot will respond with the exact structure that slack expects. This will function properly using [our scaffold][7] because of the request template that we constructed:
+By default, the SlackBot will respond with the exact structure that slack expects. This will function properly using [our scaffold](https://github.com/localytics/serverless-slackbot-scaffold) because of the request template that we constructed:
 
 ```json
 "requestTemplates": {
@@ -61,9 +61,7 @@ var slackbot = new SlackBot({
 
 ## Responding to Buttons with Actions
 
-Before you can have `Buttons with Actions` you will need to setup a [SlackApp][8], note you do not need to publicly publish your SlackApp to utilize the Slack buttons.
-
-See the [slack documentation][9] for more information on buttons.
+Before you can have `Buttons with Actions` you will need to setup a [SlackApp](https://api.slack.com/slack-apps). Note you do not need to publicly publish your SlackApp to utilize the Slack buttons. See the [slack documentation](https://api.slack.com/docs/message-buttons) for more information on buttons.
 
 The action configured must match the `name` value of the presented button.
 There's no need to use inChannelResponse or ephemeralResponse since your provided message will replace the existing message when using the callback.
@@ -90,7 +88,7 @@ After uploading a new version of your lambda function or extended periods of ina
 var slackbot = new SlackBot({ pingEnabled: true });
 ```
 
-![CloudWatch configuration][10]
+![CloudWatch configuration](doc/cloudwatch-configuration.png)
 
 If you're using Serverless to configure your lambda project, you can add the following to your `s-function.json` file to configure the event source on function deploy:
 
@@ -133,7 +131,7 @@ slackbot.addCommand('echo', ['title', { lastName: 'User' }, 'words...'], 'Respon
 
 ## Routing
 
-The routing for the commands is achieved by the Slackbot's router acting as the [handler function][11] for the lambda. After a Slackbot has been fully configured (adding in configuration, building the command callbacks, etc.), the handler should be set to the return value of the buildRouter function.
+The routing for the commands is achieved by the Slackbot's router acting as the [handler function](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han) for the lambda. After a Slackbot has been fully configured (adding in configuration, building the command callbacks, etc.), the handler should be set to the return value of the buildRouter function.
 
 ```javascript
 exports.handler = slackbot.buildRouter();
@@ -162,15 +160,3 @@ describe('slackbot', function () {
 ```
 
 assuming your handler is named index.js and you had `exports.slackbot = slackbot` in your handler.
-
-[1]: https://travis-ci.org/localytics/lambda-slack-router.svg?branch=master
-[2]: https://travis-ci.org/localytics/lambda-slack-router
-[3]: https://img.shields.io/npm/v/lambda-slack-router.svg
-[4]: https://www.npmjs.com/package/lambda-slack-router
-[5]: https://api.slack.com/slash-commands
-[6]: http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html
-[7]: https://github.com/localytics/serverless-slackbot-scaffold
-[8]: https://api.slack.com/slack-apps
-[9]: https://api.slack.com/docs/message-buttons
-[10]: doc/cloudwatch-configuration.png
-[11]: http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html
