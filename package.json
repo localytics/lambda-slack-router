@@ -18,16 +18,16 @@
   },
   "homepage": "https://github.com/localytics/lambda-slack-router",
   "dependencies": {
-    "qs": "^6.0.2"
+    "qs": "^6.4.0"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
+    "chai": "^3.5.0",
     "dirty-chai": "^1.2.2",
-    "eslint": "^2.2.0",
-    "eslint-config-airbnb": "^6.0.2",
-    "mocha": "^2.3.4",
-    "sinon": "^1.17.2",
-    "sinon-chai": "^2.8.0"
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "mocha": "^3.3.0",
+    "sinon": "^2.2.0",
+    "sinon-chai": "^2.10.0"
   },
   "eslintConfig": {
     "extends": "airbnb/legacy",
@@ -38,6 +38,7 @@
     "rules": {
       "camelcase": 0,
       "func-names": 0,
+      "no-underscore-dangle": 0,
       "max-len": [
         2,
         {
