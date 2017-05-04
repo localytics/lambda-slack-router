@@ -19,6 +19,10 @@ This package is [hosted on npm](https://www.npmjs.com/package/lambda-slack-route
 
     $ npm install --save lambda-slack-router
 
+or if you're using `yarn`, run:
+
+    $ yarn add lambda-slack-router
+
 ## Configuration
 
 Commands are added to the slackbot through the `addCommand` function. Sample configuration for the above ping command would look like
