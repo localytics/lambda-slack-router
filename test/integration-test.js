@@ -11,7 +11,7 @@ describe('integration', function () {
     var callback = null;
     var slackbot = new SlackBot({ token: 'token' });
 
-    var assertHelp = function (event, lambdaContext, lambdaCallback) {
+    var assertHelp = function (options, lambdaContext, lambdaCallback) {
       var descriptions = [
         'testA (tA, A): Test command A',
         'testB arg1 arg2 arg3:3: Test command B',
@@ -19,7 +19,7 @@ describe('integration', function () {
         'help: display this help message'
       ];
 
-      slackbot.buildRouter()(event, lambdaContext, lambdaCallback);
+      slackbot.buildRouter()(options, lambdaContext, lambdaCallback);
       expect(lambdaCallback).to.have.been.calledWithExactly(null, {
         text: 'Available commands:',
         attachments: [{ text: descriptions.join('\n') }],
@@ -27,17 +27,17 @@ describe('integration', function () {
       });
     };
 
-    slackbot.addCommand('testA', 'Test command A', function (event, cb) {
+    slackbot.addCommand('testA', 'Test command A', function (options, cb) {
       cb(null, this.ephemeralResponse('A response'));
     });
-    slackbot.addCommand('testB', ['arg1', 'arg2', { arg3: 3 }], 'Test command B', function (event, cb) {
+    slackbot.addCommand('testB', ['arg1', 'arg2', { arg3: 3 }], 'Test command B', function (options, cb) {
       cb(null, this.ephemeralResponse('B response'));
     });
-    slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (event, cb) {
-      cb(null, this.ephemeralResponse(event.args.arg2.join(' ')));
+    slackbot.addCommand('testC', ['arg1', 'arg2...'], 'Test command C', function (options, cb) {
+      cb(null, this.ephemeralResponse(options.args.arg2.join(' ')));
     });
-    slackbot.addAction('testButtonAction', function (event, cb) {
-      cb(null, { text: 'You pressed the ' + event.body.actions[0].name + ' button' });
+    slackbot.addAction('testButtonAction', function (options, cb) {
+      cb(null, { text: 'You pressed the ' + options.body.actions[0].name + ' button' });
     });
 
     slackbot.aliasCommand('testA', 'tA', 'A');
@@ -105,7 +105,7 @@ describe('integration', function () {
 
     it('routes to the appropriate action', function () {
       var event = {
-        body: 'payload={\"actions\":[{\"name\":\"testButtonAction\",\"value\":\"testValue\"}],\"token\":\"token\"}'
+        body: 'payload={"actions":[{"name":"testButtonAction","value":"testValue"}],"token":"token"}'
       };
       slackbot.buildRouter()(event, context, callback);
 
@@ -165,10 +165,10 @@ describe('integration', function () {
     var slackbot = new SlackBot({ token: 'token' });
     var args = ['title', { lastName: 'User' }, 'words...'];
 
-    slackbot.addCommand('echo', args, 'Greetings', function (event, callback) {
-      var response = 'Hello ' + event.args.title + ' ' + event.args.lastName;
-      if (event.args.words.length) {
-        response += ', ' + event.args.words.join(' ');
+    slackbot.addCommand('echo', args, 'Greetings', function (options, callback) {
+      var response = 'Hello ' + options.args.title + ' ' + options.args.lastName;
+      if (options.args.words.length) {
+        response += ', ' + options.args.words.join(' ');
       }
       callback(null, slackbot.ephemeralResponse(response));
     });
@@ -197,7 +197,7 @@ describe('integration', function () {
     var lambdaCallback = null;
     var slackbot = new SlackBot();
 
-    slackbot.addCommand('test', 'Test', function (event, callback) {
+    slackbot.addCommand('test', 'Test', function (options, callback) {
       callback(null, this.ephemeralResponse('test'));
     });
 
@@ -225,7 +225,7 @@ describe('integration', function () {
       var slackbot = new SlackBot();
       var lambdaCallback = sinon.spy();
 
-      slackbot.addCommand('test', 'Test', function (event, callback) {
+      slackbot.addCommand('test', 'Test', function (options, callback) {
         callback('foobar');
       });
 

@@ -49,12 +49,12 @@ SlackBot.prototype.addCommand = function (command, args, desc, callback) {
 SlackBot.prototype.aliasCommand = function (commandName) {
   var argIndex;
 
-  if (!this.commands.hasOwnProperty(commandName)) {
+  if (!Object.prototype.hasOwnProperty.call(this.commands, commandName)) {
     throw new Error(commandName + ' is not a configured command');
   }
 
-  for (argIndex = 1; argIndex < arguments.length; argIndex++) {
-    if (this.aliases.hasOwnProperty(arguments[argIndex])) {
+  for (argIndex = 1; argIndex < arguments.length; argIndex += 1) {
+    if (Object.prototype.hasOwnProperty.call(this.aliases, arguments[argIndex])) {
       throw new Error(arguments[argIndex] + ' is already aliased or is an invalid alias name');
     }
     this.aliases[arguments[argIndex]] = commandName;
@@ -66,7 +66,7 @@ SlackBot.prototype.callCommand = function (commandName, event, callback) {
   var args;
   var modifiedEvent = event;
 
-  if (!this.commands.hasOwnProperty(commandName)) {
+  if (!Object.prototype.hasOwnProperty.call(this.commands, commandName)) {
     return this.help(event, callback);
   }
   args = ArgParser.align(this.commands[commandName].args, event.args || []);
@@ -156,12 +156,12 @@ SlackBot.prototype.findCommand = function (payload) {
   var commandName;
   var commandNameLength;
 
-  for (commandNameLength = payload.length - 1; commandNameLength > 0; commandNameLength--) {
+  for (commandNameLength = payload.length - 1; commandNameLength > 0; commandNameLength -= 1) {
     commandName = splitPayload.slice(0, commandNameLength).join(' ');
-    if (this.aliases.hasOwnProperty(commandName)) {
+    if (Object.prototype.hasOwnProperty.call(this.aliases, commandName)) {
       return { commandName: this.aliases[commandName], args: splitPayload.slice(commandNameLength) };
     }
-    if (this.commands.hasOwnProperty(commandName)) {
+    if (Object.prototype.hasOwnProperty.call(this.commands, commandName)) {
       return { commandName: commandName, args: splitPayload.slice(commandNameLength) };
     }
   }

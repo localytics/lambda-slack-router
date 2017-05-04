@@ -26,8 +26,8 @@ Commands are added to the slackbot through the `addCommand` function. Sample con
 ```javascript
 var SlackBot = require('lambda-slack-router');
 var slackbot = new SlackBot({ token: "<token>" });
-slackbot.addCommand('ping', 'Ping the lambda', function (event, callback) {
-  callback(null, this.inChannelResponse('Hello World'));
+slackbot.addCommand('ping', 'Ping the lambda', function (options, callback) {
+  callback(null, slackbot.inChannelResponse('Hello World'));
 });
 ```
 
@@ -35,7 +35,7 @@ In the above code, a slackbot is created with the given token (used for verifyin
 
 The first argument to the `addCommand` function is the name of the command. The second argument is the description of the function. This is used in the generated `help` command, and is useful to your users when they can't remember the syntax of your bot.
 
-The two arguments passed to the command callback are `event` and `callback`. The `event` object contains all of the properties that came from lambda, as well as the `args` property (the arguments passed to the function, as an object). The callback function is the same as the `context.done` function that's built into [lambda](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html). The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
+The two arguments passed to the command callback are `options` and `callback`. The `options` object contains all of the properties that came from lambda, as well as the `args` property (the arguments passed to the function, as an object). The callback function is the same as the `context.done` function that's built into [lambda](http://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html). The function expects that an error will be passed in as the left argument if there is one, and otherwise a successful execution's response will be passed in as the right argument.
 
 The responses for Slack can either be ephemeral (returning to the user that invoked the function) or in-channel (returning to everyone in the channel in which the function was invoked). SlackBot has a built-in helper for each of these types of responses which are `ephemeralResponse` and `inChannelResponse` respectively. If you pass a string to either one of these functions they return a correctly-formatted object. If you want more fine-grained control, you can pass an object to them and they will set the `response_type` attribute. You can also ignore these functions entirely if you want to return a custom payload.
 
@@ -67,7 +67,7 @@ The action configured must match the `name` value of the presented button.
 There's no need to use inChannelResponse or ephemeralResponse since your provided message will replace the existing message when using the callback.
 
 ```javascript
-slackbot.addAction('buttonPress', function (event, callback) {
+slackbot.addAction('buttonPress', function (options, callback) {
   callback(null, { text: "You pressed a button" });
 });
 ```
@@ -112,20 +112,20 @@ If you're using Serverless to configure your lambda project, you can add the fol
 Commands can optionally have arguments. When commands have arguments, the router will only invoke that command if the number of arguments matches. Arguments are specified as an array as the second argument to `addCommand`. As an example:
 
 ```javascript
-slackbot.addCommand('testing', ['one', 'two'], 'Testing', function (event, callback) {
-  callback(null, this.ephemeralResponse('One: ' + event.args.one + ', Two: ' + event.args.two));
+slackbot.addCommand('testing', ['one', 'two'], 'Testing', function (options, callback) {
+  callback(null, slackbot.ephemeralResponse('One: ' + options.args.one + ', Two: ' + options.args.two));
 });
 ```
 
 There are three types of arguments: required, optional, and splat. The two arguments in the above command are both required. To specify an optional command use an object with one key where the key is the name of the argument and the value is the optional value. To specify a splat argument (one that will be an array of indeterminant length) append an ellipsis to the end of the name. An example that uses all three is below:
 
 ```javascript
-slackbot.addCommand('echo', ['title', { lastName: 'User' }, 'words...'], 'Respond to the user', function (event, callback) {
-  var response = 'Hello ' + event.args.title + ' ' + event.args.lastName;
+slackbot.addCommand('echo', ['title', { lastName: 'User' }, 'words...'], 'Respond to the user', function (options, callback) {
+  var response = 'Hello ' + options.args.title + ' ' + options.args.lastName;
   if (option.args.words.length) {
-    response += ', ' + event.args.words.join(' ');
+    response += ', ' + options.args.words.join(' ');
   }
-  callback(null, this.ephemeralResponse(response));
+  callback(null, slackbot.ephemeralResponse(response));
 });
 ```
 
