@@ -33,9 +33,15 @@ describe('arg-parser', function () {
       it('correctly aligns required arguments around splatting', function () {
         var args = ['a', 'b', 'c...', 'd', 'e'];
         expect(ArgParser.align(args, [1, 2, 3])).to.be.false();
-        expect(ArgParser.align(args, [1, 2, 3, 4])).to.deep.equal({ a: 1, b: 2, c: [], d: 3, e: 4 });
-        expect(ArgParser.align(args, [1, 2, 3, 4, 5])).to.deep.equal({ a: 1, b: 2, c: [3], d: 4, e: 5 });
-        expect(ArgParser.align(args, [1, 2, 3, 4, 5, 6, 7])).to.deep.equal({ a: 1, b: 2, c: [3, 4, 5], d: 6, e: 7 });
+        expect(ArgParser.align(args, [1, 2, 3, 4])).to.deep.equal({
+          a: 1, b: 2, c: [], d: 3, e: 4
+        });
+        expect(ArgParser.align(args, [1, 2, 3, 4, 5])).to.deep.equal({
+          a: 1, b: 2, c: [3], d: 4, e: 5
+        });
+        expect(ArgParser.align(args, [1, 2, 3, 4, 5, 6, 7])).to.deep.equal({
+          a: 1, b: 2, c: [3, 4, 5], d: 6, e: 7
+        });
       });
     });
 

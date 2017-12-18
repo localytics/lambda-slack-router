@@ -109,8 +109,9 @@ describe('integration', function () {
       };
       slackbot.buildRouter()(event, context, callback);
 
-      expect(callback).to.have.been.calledWithExactly(null,
-        { text: 'You pressed the testButtonAction button' });
+      expect(callback).to.have.been.calledWithExactly(null, {
+        text: 'You pressed the testButtonAction button'
+      });
     });
 
     it('supports splatting the last argument', function () {
